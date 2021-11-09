@@ -23,6 +23,6 @@ class MindMapFormatter:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Configuration
-    parser.add_argument("--input")
+    parser.add_argument("--input", required=True)
 
     MindMapFormatter(parser.parse_args().input).read()
