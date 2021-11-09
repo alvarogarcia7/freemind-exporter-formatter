@@ -16,4 +16,15 @@ Export [Freemind][0] mindmaps.
 
 ## How to use it
 
+### Sample usage
+
 See examples in `Makefile` (`test-e2e`)
+
+### Extending the formatters
+
+This project has been designed so that the formatting is separated from the XML representation.
+
+To use another Exporter, implement another child of `MindmapExporter`, then call it in the main arguments.
+See example invocation in the `test-e2e` make goal.
+
+There is a sample exporter in the `print_as_titles.py` file.
