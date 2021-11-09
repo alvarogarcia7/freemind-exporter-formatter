@@ -10,8 +10,17 @@ class MindMapFormatter:
     def read(self):
         with open(self.path, "r") as file:
             tree = xml.parse(file)
-            root = tree.getroot()[0]
+            root = self._get_center_node(tree)
             self._print_tree(root)
+
+    @staticmethod
+    def _get_center_node(tree):
+        """
+        Skip the topmost node, a container for the head of the mindmap
+        :param tree: the whole mindmap
+        :return: the head of the mindmap, with its children
+        """
+        return tree.getroot()[0]
 
     def _print_tree(self, root):
         module = __import__(self.program)
