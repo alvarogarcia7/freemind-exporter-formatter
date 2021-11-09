@@ -4,7 +4,7 @@ test: typecheck test-e2e ## Execute all tests
 
 typecheck:
 	. ${PWD}/venv/bin/activate
-	find . \( -path ./venv -o -path ./build \) -prune -false -o -iname "*.py" -type f -exec mypy {} \;
+	mypy . --exclude venv --strict --warn-unreachable --warn-return-any --disallow-untyped-calls
 .PHONY: typecheck
 
 
