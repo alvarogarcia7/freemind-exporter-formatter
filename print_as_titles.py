@@ -1,7 +1,7 @@
 from mindmap_exporter import MindmapExporter
 
 
-class TitlesMindMapFormatter(MindmapExporter):
+class Formatter(MindmapExporter):
     def export(self, tree):
         self._print_tree(tree)
 
