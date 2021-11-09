@@ -1,5 +1,5 @@
 import argparse
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as xml
 
 
 class MindMapFormatter:
@@ -8,7 +8,7 @@ class MindMapFormatter:
 
     def read(self):
         with open(self.path, "r") as file:
-            tree = ET.parse(file)
+            tree = xml.parse(file)
             root = tree.getroot()[0]
             self._print_tree(root)
 
