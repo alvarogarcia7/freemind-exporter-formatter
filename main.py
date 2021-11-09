@@ -12,7 +12,8 @@ class MindMapFormatter:
             root = tree.getroot()[0]
             self._print_tree(root)
 
-    def _print_tree(self, root):
+    @staticmethod
+    def _print_tree(root):
         # program = "print_as_titles"
         # module = __import__(program)
         from print_as_titles import TitlesMindMapFormatter
