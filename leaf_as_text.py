@@ -16,3 +16,4 @@ class Formatter(MindmapExporter):
                 self._print_tree_as_titles(child, level + 1)
         else:
             print(root.attrib['TEXT'])
+            print("") # In case there are two paragraphs together, needs a newline (otherwise it's the same paragraph)
