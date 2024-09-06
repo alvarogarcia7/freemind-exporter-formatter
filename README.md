@@ -18,7 +18,7 @@ Export [Freemind][0] mindmaps.
 
 ### Sample usage
 
-See examples in `[approval_tests](tests%2Fapproval_tests)`:
+See examples in [approval_tests](tests%2Fapproval_tests):
 
 ```bash
 python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py
@@ -29,6 +29,6 @@ python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py
 This project has been designed so that the formatting is separated from the XML representation.
 
 To use another Exporter, implement another child of `MindmapExporter`, then call it in the main arguments.
-See example invocation in the `[approval_tests](tests%2Fapproval_tests)` folder.
+See example invocation in the [approval_tests](tests%2Fapproval_tests) folder.
 
 There is a sample exporter in the `print_as_titles.py` file.
