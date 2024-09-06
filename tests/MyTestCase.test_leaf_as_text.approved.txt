@@ -1,0 +1,13 @@
+Executed command: python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py
+Result code: 0
+Standard Output (starting on the new line):
+# New Mindmap
+## Title 1
+Title 2
+
+Title 2
+
+Title 1
+
+
+Standard Error (starting on the new line):

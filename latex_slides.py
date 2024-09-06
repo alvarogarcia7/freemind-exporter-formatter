@@ -23,7 +23,7 @@ class Formatter(MindmapExporter):
             print("\\begin{itemize}")
 
         elif level == 3:
-            print(f"    \item {node_text}")
+            print(f"    \\item {node_text}")
 
         for child in root:
             self._print_tree_as_titles(child, level + 1)
