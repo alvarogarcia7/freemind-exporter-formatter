@@ -14,10 +14,10 @@ repos:
         name: MyPy Typecheck
         entry: make typecheck
         language: system
-#      - id: unittest
-#        name: Python Unit Tests
-#        entry: make test-python
-#        language: system
+      - id: unittest
+        name: Python Unit Tests
+        entry: make test-python
+        language: system
       - id: freeze-requirements
         name: Freeze Requirements
         entry: make freeze
