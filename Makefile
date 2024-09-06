@@ -12,7 +12,7 @@ test: check-virtual-env typecheck test-python test-e2e ## Execute all tests
 .PHONY: test
 
 test-python: check-virtual-env
-	echo pytest . - NO OP
+	pytest .
 .PHONY: test-python
 
 test-e2e: test-e2e-print_as_titles test-e2e-leaf_as_text ## Execute all E2E tests
