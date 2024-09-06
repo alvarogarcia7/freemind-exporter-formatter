@@ -15,5 +15,10 @@ python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py""")))
 python3 main.py --input ./data/test1.mm --formatter latex_slides.py""")))
 
 
+    def test_titles(self) -> None:
+        verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
+python3 main.py --input ./data/test1.mm --formatter print_as_titles.py""")))
+
+
 if __name__ == '__main__':
     unittest.main()
