@@ -1,0 +1,25 @@
+Executed command: python3 main.py --input ./data/test1.mm --formatter latex_slides.py
+Result code: 0
+Standard Output (starting on the new line):
+
+\section{Title 1}
+
+
+\begin{frame}
+    \frametitle{Title 2}
+
+\begin{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Title 2}
+
+\begin{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Title 1}
+
+
+Standard Error (starting on the new line):
