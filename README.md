@@ -18,7 +18,11 @@ Export [Freemind][0] mindmaps.
 
 ### Sample usage
 
-See examples in `[approval_tests](tests%2Fapproval_tests)`
+See examples in `[approval_tests](tests%2Fapproval_tests)`:
+
+```bash
+python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py
+```
 
 ### Extending the formatters
 
