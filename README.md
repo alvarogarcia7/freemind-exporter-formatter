@@ -18,7 +18,7 @@ Export [Freemind][0] mindmaps.
 
 ### Sample usage
 
-See examples in `Makefile` (`test-e2e`)
+See examples in `[approval_tests](tests%2Fapproval_tests)`
 
 ### Extending the formatters
 
