@@ -1,12 +1,19 @@
+include makefiles/docker-compose.mk
+include makefiles/virtualenvironment.mk
 
-test: typecheck test-e2e ## Execute all tests
+install: requirements install-githooks
+.PHONY: install
+
+install-githooks: check-virtual-env
+	pre-commit install
+.PHONY: install-githooks
+
+test: check-virtual-env typecheck test-python test-e2e ## Execute all tests
 .PHONY: test
 
-typecheck:
-	. ${PWD}/venv/bin/activate
-	mypy . --exclude venv --strict --warn-unreachable --warn-return-any --disallow-untyped-calls
-.PHONY: typecheck
-
+test-python: check-virtual-env
+	echo pytest . - NO OP
+.PHONY: test-python
 
 test-e2e: test-e2e-print_as_titles test-e2e-leaf_as_text ## Execute all E2E tests
 .PHONY: test-e2e
