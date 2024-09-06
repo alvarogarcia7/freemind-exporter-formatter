@@ -29,6 +29,3 @@ test-e2e-print_as_titles:
 	python3 main.py --input ./data/test1.mm --formatter print_as_titles.py > data/test1_print_as_titles.actual
 	diff -q data/test1_print_as_titles.actual data/test1_print_as_titles.expected
 .PHONY: test-e2e-print_as_titles
-
-pre-commit: test ## Git hook for pre-commit
-.PHONY: pre-commit
