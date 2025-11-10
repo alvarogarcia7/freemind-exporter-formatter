@@ -18,6 +18,16 @@ jobs:
     - name: Set up uv
       uses: astral-sh/setup-uv@v3
 
+    - name: Cache uv dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-uv-
+
     - name: Install dependencies
       run: uv sync
 
