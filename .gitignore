@@ -38,7 +38,10 @@ Thumbs.db
 temp/
 .temp/
 
-# Virtual environment
+# Virtual environment (uv)
+.venv/
+
+# Virtual environment (legacy)
 venv/
 
 # Generated files
@@ -47,16 +50,16 @@ venv/
 # Temporary files
 test/build/
 
-#coverage files and folders
+# Coverage files and folders
 coverage-reports
 *.coverage
 coverage.xml
 
 # Python cache
 __pycache__/
-
-# MyPy
-.mypy_cache
+*.pyc
+.mypy_cache/
+.ruff_cache/
 
 # Pytest
 .pytest_cache
