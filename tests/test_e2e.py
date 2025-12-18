@@ -10,15 +10,15 @@ class MyTestCase(unittest.TestCase):
 
     def test_leaf_as_text(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/test1.mm --formatter leaf_as_text.py""")))
+python3 main.py --input ./data/Freemind/test1.mm --formatter leaf_as_text.py""")))
 
     def test_leaf_as_latex_slides(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/test1.mm --formatter latex_slides.py""")))
+python3 main.py --input ./data/Freemind/test1.mm --formatter latex_slides.py""")))
 
     def test_titles(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/test1.mm --formatter print_as_titles.py""")))
+python3 main.py --input ./data/Freemind/test1.mm --formatter print_as_titles.py""")))
 
 
 if __name__ == '__main__':

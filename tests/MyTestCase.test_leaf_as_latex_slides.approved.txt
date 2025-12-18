@@ -1,4 +1,4 @@
-Executed command: python3 main.py --input ./data/test1.mm --formatter latex_slides.py
+Executed command: python3 main.py --input ./data/Freemind/test1.mm --formatter latex_slides.py
 Result code: 0
 Standard Output (starting on the new line):
 
