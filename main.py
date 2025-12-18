@@ -15,8 +15,24 @@ class MindMapFormatter:
             :param tree: the whole mindmap
             :return: the head of the mindmap, with its children
             """
-            root = tree.getroot()[0]
+            map_root = tree.getroot()
+            # Handle both Freemind and FreePlane formats
+            # Freemind: <map><node>...</node></map>
+            # FreePlane: <map><bookmarks>...</bookmarks><node>...</node></map>
+            root = self._get_root_node(map_root)
             self._print_tree(root)
+
+    def _get_root_node(self, map_root: xml.Element) -> xml.Element:
+        """
+        Extract the root node from the map, handling both Freemind and FreePlane formats.
+
+        :param map_root: the map element
+        :return: the root node element
+        """
+        for child in map_root:
+            if child.tag == 'node':
+                return child
+        raise ValueError("No node element found in map")
 
     def _print_tree(self, root: xml.Element) -> None:
         module = __import__(self.program)
