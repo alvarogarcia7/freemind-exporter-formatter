@@ -1,0 +1,41 @@
+Executed command: python3 main.py --input ./data/FreePlane/mm1.mm --formatter latex_slides.py
+Result code: 0
+Standard Output (starting on the new line):
+
+\section{Right1}
+
+
+\begin{frame}
+    \frametitle{Right1.1}
+
+\begin{itemize}
+    \item Leaf1.1.1
+    \item Leaf1.1.2
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Right1.2}
+
+\begin{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Right2}
+
+
+\section{Left1}
+
+
+\section{Left2}
+
+
+\begin{frame}
+    \frametitle{Left2.1}
+
+\begin{itemize}
+    \item Leaf2.1.1
+\end{itemize}
+\end{frame}
+
+Standard Error (starting on the new line):
