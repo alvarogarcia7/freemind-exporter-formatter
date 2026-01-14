@@ -1,0 +1,9 @@
+Executed command: python3 main.py --input ./data/FreePlane/orgmode_test4.mm --formatter mindmap_orgmode.py
+Result code: 0
+Standard Output (starting on the new line):
+* PROJ Worklog
+** PROJ [2026-01-19 Mon]
+
+
+
+Standard Error (starting on the new line):

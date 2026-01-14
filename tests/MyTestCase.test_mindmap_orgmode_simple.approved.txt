@@ -1,0 +1,12 @@
+Executed command: python3 main.py --input ./data/FreePlane/orgmode_test1.mm --formatter mindmap_orgmode.py
+Result code: 0
+Standard Output (starting on the new line):
+* PROJ Worklog
+** PROJ [2026-01-16 Fri]
+*** PROJ Projects
+**** PROJ Simple Task
+- 09:00 - 10:00
+
+
+
+Standard Error (starting on the new line):

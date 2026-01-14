@@ -63,3 +63,6 @@ __pycache__/
 
 # Pytest
 .pytest_cache
+
+# Test output files
+data/FreePlane/actual.mm3.org

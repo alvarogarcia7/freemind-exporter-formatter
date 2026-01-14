@@ -1,0 +1,30 @@
+Executed command: python3 main.py --input ./data/FreePlane/mm3.mm --formatter mindmap_orgmode.py
+Result code: 0
+Standard Output (starting on the new line):
+* PROJ Worklog
+** PROJ [2026-01-14 Wed]
+*** PROJ WORKLOG
+- 11:14 - 11:21: Work on this
+- 11:21 - 11:35: Work on that
+- 11:35 - noend: Work on Foo
+
+** PROJ [2026-01-15 Thu]
+*** PROJ Projects
+**** PROJ Investigate git-annex
+- 08:36 - 11:16 ; Comment: End of task
+- 11:17 - ; Task without end
+- 11:18 - ; Another task, overlapping
+
+**** PROJ Another project
+***** Task 1
+- 11:21 - 11:24
+- 11:25 - 11:31
+
+***** Task 2
+- 11:34 - 11:45
+- 11:59 -
+
+
+
+
+Standard Error (starting on the new line):
