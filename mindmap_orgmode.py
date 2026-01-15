@@ -49,7 +49,12 @@ class Formatter(MindmapExporter):
                 for idx, project_info in enumerate(projects_for_date):
                     name = project_info['name']
                     project_name = name
-                    lines.append(f"**** PROJ {project_name}")
+                    # include project-level tags (icons) if present
+                    if "tags" in project_info and project_info['tags']:
+                        proj_tags = f" :{':'.join(project_info['tags'])}:"
+                    else:
+                        proj_tags = ""
+                    lines.append(f"**** PROJ {project_name}{proj_tags}")
 
                     # Check if project has multiple tasks with entries on this date
                     tasks_with_entries_on_date = []
@@ -61,8 +66,12 @@ class Formatter(MindmapExporter):
                     has_multiple_tasks = len(tasks_with_entries_on_date) > 1
 
                     for task_info, entries_for_date in tasks_with_entries_on_date:
+                        if "tags" in task_info and task_info['tags']:
+                            formatted_tags = f":{':'.join(task_info['tags'])}:"
+                        else:
+                            formatted_tags = ""
                         if task_info['task_name']:
-                            lines.append(f"***** {task_info['task_name']}")
+                            lines.append(f"***** {task_info['task_name']}{formatted_tags}")
 
                         for entry in entries_for_date:
                             time_str = self._format_time_entry(entry)
@@ -187,18 +196,20 @@ class Formatter(MindmapExporter):
                     start_time = self._parse_datetime_from_node(task_node)
                     if start_time:
                         end_time = self._find_end_time(task_node)
-                        task_description = self._get_task_description(task_node)
-                        
+                        task_description, _ = self._get_task_description(task_node)
+                        tags = self._extract_tags_from_node(task_node)
+
                         entry_date = start_time.date()
                         if entry_date not in dates_seen:
                             dates_seen.append(entry_date)
-                        
+
                         all_worklog_entries.append({
                             'task_name': task_description,
                             'start': start_time,
                             'end': end_time,
                             'date': entry_date,
-                            'section_name': section_name
+                            'tags': tags,
+                            'section_name': section_name,
                         })
                 else:
                     has_direct_times = False
@@ -220,7 +231,9 @@ class Formatter(MindmapExporter):
                     if has_direct_times or has_subtasks:
                         project_info: Dict[str, Any] = {
                             'name': task_name,
-                            'tasks': []
+                            'tasks': [],
+                            # attach tags from the project node itself (if any icons are present)
+                            'tags': self._extract_tags_from_node(task_node)
                         }
 
                         if has_direct_times:
@@ -228,7 +241,9 @@ class Formatter(MindmapExporter):
                             if task_entries:
                                 project_info['tasks'].append({
                                     'task_name': '',
-                                    'entries': task_entries
+                                    'entries': task_entries,
+                                    # also attach tags to this task entry so downstream code can use them if needed
+                                    'tags': self._extract_tags_from_node(task_node)
                                 })
                         elif has_subtasks:
                             for child in task_node:
@@ -238,7 +253,8 @@ class Formatter(MindmapExporter):
                                     if task_entries:
                                         project_info['tasks'].append({
                                             'task_name': child_name,
-                                            'entries': task_entries
+                                            'entries': task_entries,
+                                            'tags': self._extract_tags_from_node(child)
                                         })
 
                         if project_info['tasks']:
@@ -301,16 +317,19 @@ class Formatter(MindmapExporter):
                     return end_time
         return None
 
-    def _get_task_description(self, time_node: xml.Element) -> str:
+    def _get_task_description(self, time_node: xml.Element) -> tuple[str, list[str]]:
         children = list(time_node)
         if len(children) >= 1:
+            tags = []
             for child in children:
-                if child.tag == 'node':
+                if child.tag == 'icon':
+                    tags.append("".join(list(map(lambda x: x.title(), child.attrib['BUILTIN'].split("-")))))
+                elif child.tag == 'node':
                     child_time = self._parse_datetime_from_node(child)
                     if not child_time:
                         text = child.get('TEXT', '').strip()
                         if text:
-                            return text
+                            return text, tags
                     else:
                         for grandchild in child:
                             if grandchild.tag == 'node':
@@ -318,8 +337,8 @@ class Formatter(MindmapExporter):
                                 if not grandchild_time:
                                     text = grandchild.get('TEXT', '').strip()
                                     if text:
-                                        return text
-        return ""
+                                        return text, tags
+        return "", []
 
     def _extract_comments(self, node: xml.Element) -> List[str]:
         comments: List[str] = []
@@ -337,6 +356,20 @@ class Formatter(MindmapExporter):
                             if text:
                                 comments.append(text)
         return comments
+
+    def _extract_tags_from_node(self, node: xml.Element) -> List[str]:
+        """Extract icon tags from a node and convert BUILTIN names to TitleCase without separators.
+
+        Example: BUILTIN="stop-sign" -> "StopSign". Returns an empty list if no icons present.
+        """
+        tags: List[str] = []
+        for child in node:
+            if child.tag == 'icon':
+                builtin = child.attrib.get('BUILTIN', '')
+                if builtin:
+                    parts = builtin.split("-")
+                    tags.append("".join([p.title() for p in parts]))
+        return tags
 
     def _calculate_duration_minutes(self, entry: Dict[str, Any]) -> int:
         if entry['end'] is None:
