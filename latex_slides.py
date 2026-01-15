@@ -1,48 +1,49 @@
 from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
+from typing import List
 
 
 class Formatter(MindmapExporter):
     def export(self, tree: xml.Element) -> None:
-        self._print_tree(tree)
+        output_lines = self._format_tree(tree)
+        self._print_output(output_lines)
 
-    def _print_tree(self, root: xml.Element) -> None:
-        self._print_tree_as_titles(root, 0)
+    def _format_tree(self, root: xml.Element) -> List[str]:
+        return self._format_tree_as_titles(root, 0)
 
-    def _print_tree_as_titles(self, root: xml.Element, level: int) -> None:
-        # Skip elements that don't have TEXT attribute (e.g., font, hook, edge elements)
+    def _format_tree_as_titles(self, root: xml.Element, level: int) -> List[str]:
+        lines: List[str] = []
+        
         if 'TEXT' not in root.attrib:
-            # Still process children of non-TEXT elements
             for child in root:
-                self._print_tree_as_titles(child, level)
-            return
+                lines.extend(self._format_tree_as_titles(child, level))
+            return lines
 
         node_text = root.attrib['TEXT']
         if level == 1:
-            print(f"""
+            lines.append(f"""
 \\section{{{node_text}}}
 """)
         elif level == 2:
-            print(f"""
+            lines.append(f"""
 \\begin{{frame}}
     \\frametitle{{{node_text}}}
 """)
-            print("\\begin{itemize}")
+            lines.append("\\begin{itemize}")
 
         elif level == 3:
-            print(f"    \\item {node_text}")
+            lines.append(f"    \\item {node_text}")
 
-        # Process only node children (skip non-node elements like font, hook, etc.)
         for child in root:
             if child.tag == 'node':
-                self._print_tree_as_titles(child, level + 1)
+                lines.extend(self._format_tree_as_titles(child, level + 1))
 
-        if level == 1:
-            pass
-        elif level == 2:
-            print("\\end{itemize}")
-            print("\\end{frame}")
-        elif level == 3:
-            pass
-        elif level == 4:
-            pass
+        if level == 2:
+            lines.append("\\end{itemize}")
+            lines.append("\\end{frame}")
+
+        return lines
+
+    def _print_output(self, lines: List[str]) -> None:
+        for line in lines:
+            print(line)
