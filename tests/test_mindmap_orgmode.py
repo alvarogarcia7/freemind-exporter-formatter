@@ -124,8 +124,23 @@ class TestMindmapOrgmode(unittest.TestCase):
         </node>
         """
         node = xml.fromstring(xml_str)
-        result = self.formatter._get_task_description(node)
+        result, tags = self.formatter._get_task_description(node)
         self.assertEqual(result, "Task description")
+        self.assertEqual(tags, [])
+
+
+    def test_get_task_description_with_description_and_tags(self) -> None:
+        xml_str = """
+        <node TEXT="14/01/2026 08:36" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-14T08:36+0400|datetime">
+            <icon BUILTIN="bookmark"/>
+            <icon BUILTIN="stop-sign"/>
+            <node TEXT="Task description"/>
+        </node>
+        """
+        node = xml.fromstring(xml_str)
+        result, tags = self.formatter._get_task_description(node)
+        self.assertEqual(result, "Task description")
+        self.assertEqual(tags, ["Bookmark", "StopSign"])
 
     def test_get_task_description_skips_datetime_child(self) -> None:
         xml_str = """
@@ -135,8 +150,9 @@ class TestMindmapOrgmode(unittest.TestCase):
         </node>
         """
         node = xml.fromstring(xml_str)
-        result = self.formatter._get_task_description(node)
+        result, tags = self.formatter._get_task_description(node)
         self.assertEqual(result, "Task description")
+        self.assertEqual(tags, [])
 
     def test_get_task_description_empty(self) -> None:
         xml_str = """
@@ -145,8 +161,9 @@ class TestMindmapOrgmode(unittest.TestCase):
         </node>
         """
         node = xml.fromstring(xml_str)
-        result = self.formatter._get_task_description(node)
+        result, tags = self.formatter._get_task_description(node)
         self.assertEqual(result, "")
+        self.assertEqual(tags, [])
 
     def test_extract_comments_single_comment(self) -> None:
         xml_str = """
