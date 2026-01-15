@@ -38,8 +38,9 @@ class Formatter(MindmapExporter):
                 dates_seen.append(date_val)
 
             for child in date_node:
-                if child.tag == 'node' and child.get('TEXT') == 'WORKLOG':
-                    self._extract_from_worklog(child, all_projects, all_worklog_entries, dates_seen)
+                if child.tag == 'node' and child.get('TEXT') in ['WORKLOG', 'TIMES']:
+                    section_name = child.get('TEXT', 'WORKLOG')
+                    self._extract_from_worklog(child, all_projects, all_worklog_entries, dates_seen, section_name)
 
         return all_projects, all_worklog_entries, dates_seen
 
@@ -56,7 +57,7 @@ class Formatter(MindmapExporter):
                     pass
         return None
 
-    def _extract_from_worklog(self, worklog_node: xml.Element, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> None:
+    def _extract_from_worklog(self, worklog_node: xml.Element, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date], section_name: str = 'WORKLOG') -> None:
         for task_node in worklog_node:
             if task_node.tag == 'node':
                 task_name = task_node.get('TEXT', '')
@@ -75,7 +76,8 @@ class Formatter(MindmapExporter):
                             'task_name': task_description,
                             'start': start_time,
                             'end': end_time,
-                            'date': entry_date
+                            'date': entry_date,
+                            'section_name': section_name
                         })
                 else:
                     has_direct_times = False
@@ -215,6 +217,31 @@ class Formatter(MindmapExporter):
                                 comments.append(text)
         return comments
 
+    def _calculate_duration_minutes(self, entry: Dict[str, Any]) -> int:
+        if entry['end'] is None:
+            return 0
+        delta = entry['end'] - entry['start']
+        return int(delta.total_seconds() / 60)
+
+    def _format_duration(self, total_minutes: int) -> str:
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+        if hours > 0 and minutes > 0:
+            return f"{hours}h {minutes}m"
+        elif hours > 0:
+            return f"{hours}h"
+        elif minutes > 0:
+            return f"{minutes}m"
+        else:
+            return "0m"
+
+    def _calculate_project_total(self, project_info: Dict[str, Any]) -> int:
+        total_minutes = 0
+        for task_info in project_info['tasks']:
+            for entry in task_info['entries']:
+                total_minutes += self._calculate_duration_minutes(entry)
+        return total_minutes
+
     def _print_orgmode_output(self, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> None:
         sorted_dates = sorted(dates_seen)
 
@@ -253,18 +280,37 @@ class Formatter(MindmapExporter):
                     project_name = name
                     print(f"**** PROJ {project_name}")
 
+                    # Check if project has multiple tasks with entries on this date
+                    tasks_with_entries_on_date = []
                     for task_info in project_info['tasks']:
+                        entries_for_date = [e for e in task_info['entries'] if e['start'].date() == date_val]
+                        if entries_for_date:
+                            tasks_with_entries_on_date.append((task_info, entries_for_date))
+                    
+                    has_multiple_tasks = len(tasks_with_entries_on_date) > 1
+
+                    for task_info, entries_for_date in tasks_with_entries_on_date:
                         if task_info['task_name']:
                             print(f"***** {task_info['task_name']}")
 
-                        # Filter entries to only those on this date
-                        entries_for_date = [e for e in task_info['entries'] if e['start'].date() == date_val]
                         for entry in entries_for_date:
                             time_str = self._format_time_entry(entry)
                             print(f"- {time_str}")
 
+                        # Calculate and display subtotal for this task if there are multiple tasks
+                        if has_multiple_tasks and task_info['task_name']:
+                            task_total_minutes = sum(self._calculate_duration_minutes(e) for e in entries_for_date)
+                            if task_total_minutes > 0:
+                                subtotal_str = self._format_duration(task_total_minutes)
+                                print(f"Subtotal: {subtotal_str}")
+                        
                         if task_info['task_name']:
                             print()
+
+                    total_minutes = self._calculate_project_total(project_info)
+                    if total_minutes > 0:
+                        total_str = self._format_duration(total_minutes)
+                        print(f"Total: {total_str}")
 
                     # Print blank line between projects (except after the last project)
                     if idx < len(projects_for_date) - 1:
@@ -272,10 +318,23 @@ class Formatter(MindmapExporter):
 
             worklog_entries_for_date = [e for e in all_worklog_entries_sorted if e['start'].date() == date_val]
             if worklog_entries_for_date:
-                print("*** PROJ WORKLOG")
+                sections_dict: Dict[str, List[Dict[str, Any]]] = {}
                 for entry in worklog_entries_for_date:
-                    time_str = self._format_worklog_entry(entry)
-                    print(f"- {time_str}")
+                    section_name = entry.get('section_name', 'WORKLOG')
+                    if section_name not in sections_dict:
+                        sections_dict[section_name] = []
+                    sections_dict[section_name].append(entry)
+                
+                for section_name, entries in sections_dict.items():
+                    print(f"*** PROJ {section_name}")
+                    for entry in entries:
+                        time_str = self._format_worklog_entry(entry)
+                        print(f"- {time_str}")
+                    
+                    total_minutes = sum(self._calculate_duration_minutes(entry) for entry in entries)
+                    if total_minutes > 0:
+                        total_str = self._format_duration(total_minutes)
+                        print(f"Total: {total_str}")
 
             # Add blank lines between dates
             is_last_date = date_val == sorted_dates[-1]

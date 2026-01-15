@@ -6,6 +6,7 @@ Standard Output (starting on the new line):
 *** PROJ Projects
 **** PROJ Simple Task
 - 09:00 - 10:00
+Total: 1h
 
 
 
