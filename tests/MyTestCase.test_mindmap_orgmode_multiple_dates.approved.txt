@@ -3,22 +3,32 @@ Result code: 0
 Standard Output (starting on the new line):
 * PROJ Worklog
 ** PROJ [2026-01-15 Thu]
-
+*** PROJ TIMES
+- 03:00 - noend: 
 
 ** PROJ [2026-01-20 Tue]
 *** PROJ Projects
 **** PROJ Work item A
 - 09:00 - 10:00
+Total: 1h
+*** PROJ TIMES
+- 01:00 - noend: Entry A
 
 ** PROJ [2026-01-21 Wed]
 *** PROJ Projects
 **** PROJ Work item B
 - 11:00 - 12:00
+Total: 1h
+*** PROJ TIMES
+- 01:00 - noend: Entry B
 
 ** PROJ [2026-01-22 Thu]
 *** PROJ Projects
 **** PROJ Work item C
 - 14:00 - 15:00
+Total: 1h
+*** PROJ TIMES
+- 01:00 - noend: Entry C
 
 
 

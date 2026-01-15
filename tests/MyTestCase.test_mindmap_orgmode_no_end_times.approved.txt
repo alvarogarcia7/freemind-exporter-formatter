@@ -7,7 +7,7 @@ Standard Output (starting on the new line):
 **** PROJ Project One
 - 08:00 - ; Task description
 - 09:30 - ; Another task
-*** PROJ WORKLOG
+*** PROJ TIMES
 - 14:00 - noend: Stand-alone task
 
 

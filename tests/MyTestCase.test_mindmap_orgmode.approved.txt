@@ -3,10 +3,11 @@ Result code: 0
 Standard Output (starting on the new line):
 * PROJ Worklog
 ** PROJ [2026-01-14 Wed]
-*** PROJ WORKLOG
-- 11:14 - 11:21: Work on this
-- 11:21 - 11:35: Work on that
-- 11:35 - noend: Work on Foo
+*** PROJ TIMES
+- 11:14 - 11:21: 14/1, Work on this
+- 11:21 - 11:35: 14/1, Work on that
+- 11:35 - noend: 14/1, Work on Foo
+Total: 21m
 
 ** PROJ [2026-01-15 Thu]
 *** PROJ Projects
@@ -14,16 +15,25 @@ Standard Output (starting on the new line):
 - 08:36 - 11:16 ; Comment: End of task
 - 11:17 - ; Task without end
 - 11:18 - ; Another task, overlapping
+Total: 2h 40m
 
 **** PROJ Another project
 ***** Task 1
 - 11:21 - 11:24
 - 11:25 - 11:31
+Subtotal: 9m
 
 ***** Task 2
 - 11:34 - 11:45
 - 11:59 -
+Subtotal: 11m
 
+Total: 20m
+*** PROJ TIMES
+- 11:14 - 11:21: 15/1, Work on this
+- 11:21 - 11:35: 15/1, Work on that
+- 11:35 - noend: 15/1, Work on Foo
+Total: 21m
 
 
 

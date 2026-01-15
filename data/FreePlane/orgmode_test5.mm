@@ -4,7 +4,7 @@
     <bookmark nodeId="ID_ROOT" name="Root" opensAsRoot="true"/>
 </bookmarks>
 <node TEXT="Test Mindmap - Multiple Dates" FOLDED="false" ID="ID_ROOT" CREATED="1768393507979" MODIFIED="1768393507979"><hook NAME="MapStyle">
-    <properties edgeColorConfiguration="#808080ff,#ff0000ff,#0000ffff,#00ff00ff,#ff00ffff,#00ffffff,#7c0000ff,#00007cff,#007c00ff,#7c007cff,#007c7cff,#7c7c00ff" auto_compact_layout="true" fit_to_viewport="false" show_icons="BESIDE_NODES" show_note_icons="true" show_icon_for_attributes="true" show_tags="UNDER_NODES" showTagCategories="false"/>
+    <properties edgeColorConfiguration="#808080ff,#ff0000ff,#0000ffff,#00ff00ff,#ff00ffff,#00ffffff,#7c0000ff,#00007cff,#007c00ff,#7c007cff,#007c7cff,#7c7c00ff" show_icon_for_attributes="true" auto_compact_layout="true" show_tags="UNDER_NODES" show_note_icons="true" fit_to_viewport="false" show_icons="BESIDE_NODES" showTagCategories="false"/>
     <tags category_separator="::"/>
 
 <map_styles>
@@ -82,8 +82,10 @@
 </node>
 </node>
 </node>
-<node TEXT="20/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-20T01:00+0400|datetime" ID="ID_1851349039" CREATED="1768393638960" MODIFIED="1768393654432">
+<node TEXT="TIMES" ID="ID_90100978" CREATED="1768458102816" MODIFIED="1768458103786">
+<node TEXT="20/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-20T01:00+0400|datetime" POSITION="bottom_or_right" ID="ID_1851349039" CREATED="1768393638960" MODIFIED="1768393654432">
 <node TEXT="Entry A" ID="ID_1633551985" CREATED="1768393656573" MODIFIED="1768393662853"/>
+</node>
 </node>
 </node>
 <node TEXT="21/01/2026" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-21T00:00+0400|date" ID="ID_DATE2" CREATED="1768393507979" MODIFIED="1768393507979">
@@ -94,8 +96,10 @@
 </node>
 </node>
 </node>
-<node TEXT="21/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-21T01:00+0400|datetime" ID="ID_1630604639" CREATED="1768393638960" MODIFIED="1768393670568">
+<node TEXT="TIMES" ID="ID_1586063216" CREATED="1768458096079" MODIFIED="1768458096957">
+<node TEXT="21/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-21T01:00+0400|datetime" POSITION="bottom_or_right" ID="ID_1630604639" CREATED="1768393638960" MODIFIED="1768393670568">
 <node TEXT="Entry B" ID="ID_1006133518" CREATED="1768393656573" MODIFIED="1768393672190"/>
+</node>
 </node>
 </node>
 <node TEXT="22/01/2026" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-22T00:00+0400|date" ID="ID_DATE3" CREATED="1768393507979" MODIFIED="1768393507979">
@@ -106,10 +110,12 @@
 </node>
 </node>
 </node>
-<node TEXT="22/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-22T01:00+0400|datetime" ID="ID_874474602" CREATED="1768393638960" MODIFIED="1768393679815">
+<node TEXT="TIMES" ID="ID_716302666" CREATED="1768458090446" MODIFIED="1768458091457">
+<node TEXT="22/01/2026 01:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-22T01:00+0400|datetime" POSITION="bottom_or_right" ID="ID_874474602" CREATED="1768393638960" MODIFIED="1768393679815">
 <node TEXT="Entry C" ID="ID_1646429989" CREATED="1768393656573" MODIFIED="1768393682150"/>
 </node>
-<node TEXT="15/01/2026 03:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-15T03:00+0400|datetime" ID="ID_1093062104" CREATED="1768454515858" MODIFIED="1768454520045"/>
+<node TEXT="15/01/2026 03:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-15T03:00+0400|datetime" POSITION="bottom_or_right" ID="ID_1093062104" CREATED="1768454515858" MODIFIED="1768454520045"/>
+</node>
 </node>
 <node TEXT="Projects" POSITION="bottom_or_right" ID="ID_933244045" CREATED="1768454536277" MODIFIED="1768454544386">
 <node TEXT="Project1" ID="ID_1169383717" CREATED="1768454545670" MODIFIED="1768454551858">

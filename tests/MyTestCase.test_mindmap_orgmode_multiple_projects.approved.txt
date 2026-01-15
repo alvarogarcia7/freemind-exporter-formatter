@@ -7,16 +7,21 @@ Standard Output (starting on the new line):
 **** PROJ git-annex investigation
 - 08:00 - 10:00 ; First session
 - 11:00 - 12:30 ; Second session
+Total: 3h 30m
 
 **** PROJ Another Project With Multiple Words
 ***** Subtask 1
 - 13:00 - 14:00
+Subtotal: 1h
 
 ***** Subtask 2
 - 14:30 - 15:00
+Subtotal: 30m
 
+Total: 1h 30m
 *** PROJ WORKLOG
 - 15:30 - 16:00: Quick meeting
+Total: 30m
 
 
 
