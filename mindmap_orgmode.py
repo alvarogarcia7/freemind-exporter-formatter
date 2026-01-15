@@ -8,7 +8,128 @@ class Formatter(MindmapExporter):
     def export(self, tree: xml.Element) -> None:
         date_nodes = self._find_all_date_nodes(tree)
         all_projects, all_worklog_entries, dates_seen = self._extract_all_data(date_nodes)
-        self._print_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        output_lines = self._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        self._print_output(output_lines)
+
+    def _format_orgmode_output(self, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> List[str]:
+        """Format the extracted data into orgmode output lines."""
+        lines: List[str] = []
+        sorted_dates = sorted(dates_seen)
+
+        all_worklog_entries_sorted = sorted(all_worklog_entries, key=lambda e: e['start'])
+        for i in range(len(all_worklog_entries_sorted) - 1):
+            if all_worklog_entries_sorted[i]['end'] is None:
+                next_entry = all_worklog_entries_sorted[i + 1]
+                if all_worklog_entries_sorted[i]['date'] == next_entry['date']:
+                    all_worklog_entries_sorted[i]['end'] = next_entry['start']
+
+        lines.append("* PROJ Worklog")
+
+        for date_val in sorted_dates:
+            formatted_date = date_val.strftime('%Y-%m-%d %a')
+            lines.append(f"** PROJ [{formatted_date}]")
+
+            # Filter projects to only those with entries on this date
+            projects_for_date = []
+            for project_info in all_projects:
+                project_has_entries_on_date = False
+                for task_info in project_info['tasks']:
+                    for entry in task_info['entries']:
+                        if entry['start'].date() == date_val:
+                            project_has_entries_on_date = True
+                            break
+                    if project_has_entries_on_date:
+                        break
+                if project_has_entries_on_date:
+                    projects_for_date.append(project_info)
+
+            if projects_for_date:
+                lines.append("*** PROJ Projects")
+
+                for idx, project_info in enumerate(projects_for_date):
+                    name = project_info['name']
+                    project_name = name
+                    lines.append(f"**** PROJ {project_name}")
+
+                    # Check if project has multiple tasks with entries on this date
+                    tasks_with_entries_on_date = []
+                    for task_info in project_info['tasks']:
+                        entries_for_date = [e for e in task_info['entries'] if e['start'].date() == date_val]
+                        if entries_for_date:
+                            tasks_with_entries_on_date.append((task_info, entries_for_date))
+
+                    has_multiple_tasks = len(tasks_with_entries_on_date) > 1
+
+                    for task_info, entries_for_date in tasks_with_entries_on_date:
+                        if task_info['task_name']:
+                            lines.append(f"***** {task_info['task_name']}")
+
+                        for entry in entries_for_date:
+                            time_str = self._format_time_entry(entry)
+                            lines.append(f"- {time_str}")
+
+                        # Calculate and display subtotal for this task if there are multiple tasks
+                        if has_multiple_tasks and task_info['task_name']:
+                            task_total_minutes = sum(self._calculate_duration_minutes(e) for e in entries_for_date)
+                            if task_total_minutes > 0:
+                                subtotal_str = self._format_duration(task_total_minutes)
+                                lines.append(f"Subtotal: {subtotal_str}")
+
+                        if task_info['task_name']:
+                            lines.append("")
+
+                    total_minutes = self._calculate_project_total(project_info)
+                    if total_minutes > 0:
+                        total_str = self._format_duration(total_minutes)
+                        lines.append(f"Total: {total_str}")
+
+                    # Print blank line between projects (except after the last project)
+                    if idx < len(projects_for_date) - 1:
+                        lines.append("")
+
+            worklog_entries_for_date = [e for e in all_worklog_entries_sorted if e['start'].date() == date_val]
+            if worklog_entries_for_date:
+                sections_dict: Dict[str, List[Dict[str, Any]]] = {}
+                for entry in worklog_entries_for_date:
+                    section_name = entry.get('section_name', 'WORKLOG')
+                    if section_name not in sections_dict:
+                        sections_dict[section_name] = []
+                    sections_dict[section_name].append(entry)
+
+                for section_name, entries in sections_dict.items():
+                    lines.append(f"*** PROJ {section_name}")
+                    for entry in entries:
+                        time_str = self._format_worklog_entry(entry)
+                        lines.append(f"- {time_str}")
+
+                    total_minutes = sum(self._calculate_duration_minutes(entry) for entry in entries)
+                    if total_minutes > 0:
+                        total_str = self._format_duration(total_minutes)
+                        lines.append(f"Total: {total_str}")
+
+            # Add blank lines between dates
+            is_last_date = date_val == sorted_dates[-1]
+            has_content = worklog_entries_for_date or projects_for_date
+
+            # Print blank line(s) after each date section
+            if not has_content:
+                # Empty date: 2 blank lines
+                lines.append("")
+                lines.append("")
+            elif is_last_date:
+                # Last date: 2 blank lines
+                lines.append("")
+                lines.append("")
+            else:
+                # Regular dates: 1 blank line
+                lines.append("")
+
+        return lines
+
+    def _print_output(self, lines: List[str]) -> None:
+        """Print the output lines to stdout."""
+        for line in lines:
+            print(line)
 
     def _find_all_date_nodes(self, root: xml.Element) -> List[xml.Element]:
         date_nodes: List[xml.Element] = []
@@ -242,116 +363,6 @@ class Formatter(MindmapExporter):
                 total_minutes += self._calculate_duration_minutes(entry)
         return total_minutes
 
-    def _print_orgmode_output(self, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> None:
-        sorted_dates = sorted(dates_seen)
-
-        all_worklog_entries_sorted = sorted(all_worklog_entries, key=lambda e: e['start'])
-        for i in range(len(all_worklog_entries_sorted) - 1):
-            if all_worklog_entries_sorted[i]['end'] is None:
-                next_entry = all_worklog_entries_sorted[i + 1]
-                if all_worklog_entries_sorted[i]['date'] == next_entry['date']:
-                    all_worklog_entries_sorted[i]['end'] = next_entry['start']
-
-        print("* PROJ Worklog")
-
-        for date_val in sorted_dates:
-            formatted_date = date_val.strftime('%Y-%m-%d %a')
-            print(f"** PROJ [{formatted_date}]")
-
-            # Filter projects to only those with entries on this date
-            projects_for_date = []
-            for project_info in all_projects:
-                project_has_entries_on_date = False
-                for task_info in project_info['tasks']:
-                    for entry in task_info['entries']:
-                        if entry['start'].date() == date_val:
-                            project_has_entries_on_date = True
-                            break
-                    if project_has_entries_on_date:
-                        break
-                if project_has_entries_on_date:
-                    projects_for_date.append(project_info)
-
-            if projects_for_date:
-                print("*** PROJ Projects")
-
-                for idx, project_info in enumerate(projects_for_date):
-                    name = project_info['name']
-                    project_name = name
-                    print(f"**** PROJ {project_name}")
-
-                    # Check if project has multiple tasks with entries on this date
-                    tasks_with_entries_on_date = []
-                    for task_info in project_info['tasks']:
-                        entries_for_date = [e for e in task_info['entries'] if e['start'].date() == date_val]
-                        if entries_for_date:
-                            tasks_with_entries_on_date.append((task_info, entries_for_date))
-                    
-                    has_multiple_tasks = len(tasks_with_entries_on_date) > 1
-
-                    for task_info, entries_for_date in tasks_with_entries_on_date:
-                        if task_info['task_name']:
-                            print(f"***** {task_info['task_name']}")
-
-                        for entry in entries_for_date:
-                            time_str = self._format_time_entry(entry)
-                            print(f"- {time_str}")
-
-                        # Calculate and display subtotal for this task if there are multiple tasks
-                        if has_multiple_tasks and task_info['task_name']:
-                            task_total_minutes = sum(self._calculate_duration_minutes(e) for e in entries_for_date)
-                            if task_total_minutes > 0:
-                                subtotal_str = self._format_duration(task_total_minutes)
-                                print(f"Subtotal: {subtotal_str}")
-                        
-                        if task_info['task_name']:
-                            print()
-
-                    total_minutes = self._calculate_project_total(project_info)
-                    if total_minutes > 0:
-                        total_str = self._format_duration(total_minutes)
-                        print(f"Total: {total_str}")
-
-                    # Print blank line between projects (except after the last project)
-                    if idx < len(projects_for_date) - 1:
-                        print()
-
-            worklog_entries_for_date = [e for e in all_worklog_entries_sorted if e['start'].date() == date_val]
-            if worklog_entries_for_date:
-                sections_dict: Dict[str, List[Dict[str, Any]]] = {}
-                for entry in worklog_entries_for_date:
-                    section_name = entry.get('section_name', 'WORKLOG')
-                    if section_name not in sections_dict:
-                        sections_dict[section_name] = []
-                    sections_dict[section_name].append(entry)
-                
-                for section_name, entries in sections_dict.items():
-                    print(f"*** PROJ {section_name}")
-                    for entry in entries:
-                        time_str = self._format_worklog_entry(entry)
-                        print(f"- {time_str}")
-                    
-                    total_minutes = sum(self._calculate_duration_minutes(entry) for entry in entries)
-                    if total_minutes > 0:
-                        total_str = self._format_duration(total_minutes)
-                        print(f"Total: {total_str}")
-
-            # Add blank lines between dates
-            is_last_date = date_val == sorted_dates[-1]
-            has_content = worklog_entries_for_date or projects_for_date
-
-            # Print blank line(s) after each date section
-            if not has_content:
-                # Empty date: 2 blank lines
-                print()
-                print()
-            elif is_last_date:
-                # Last date: 2 blank lines
-                print()
-                print()
-            else:
-                # Regular dates: 1 blank line
-                print()
 
     def _format_time_entry(self, entry: Dict[str, Any]) -> str:
         start_str = entry['start'].strftime('%H:%M')
