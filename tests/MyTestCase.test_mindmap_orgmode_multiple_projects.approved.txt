@@ -1,4 +1,4 @@
-Executed command: python3 main.py --input ./data/FreePlane/orgmode_test3.mm --formatter mindmap_orgmode.py
+Executed command: python3 main.py --input ./data/FreePlane/orgmode_test3.mm --formatter orgmode.py
 Result code: 0
 Standard Output (starting on the new line):
 * PROJ Worklog

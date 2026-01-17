@@ -34,27 +34,27 @@ python3 main.py --input ./data/FreePlane/mm1.mm --formatter print_as_titles.py""
 
     def test_mindmap_orgmode(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/mm3.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/mm3.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_simple(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_test1.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_test1.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_no_end_times(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_test2.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_test2.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_multiple_projects(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_test3.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_test3.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_empty_worklog(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_test4.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_test4.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_multiple_dates(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_test5.mm --formatter mindmap_orgmode.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_test5.mm --formatter orgmode.py""")))
 
     def test_mindmap_orgmode_lists(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
