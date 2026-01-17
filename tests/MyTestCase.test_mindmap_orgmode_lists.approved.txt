@@ -1,0 +1,17 @@
+Executed command: python3 main.py --input ./data/FreePlane/orgmode_lists/input.mm --formatter mindmap_orgmode_lists.py
+Result code: 0
+Standard Output (starting on the new line):
+#+title: Export
+
+* PROJ 16/01/2026
+- B0.1-Leaf
+** PROJ A0.1
+- A1.2-Leaf
+*** PROJ A1.1
+- A2.2-Leaf
+**** PROJ A2.1
+- A3-Leaf
+**** TODO Buy Groceries
+** TODO Buy Milk
+
+Standard Error (starting on the new line):
