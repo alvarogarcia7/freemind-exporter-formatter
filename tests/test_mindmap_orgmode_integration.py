@@ -10,10 +10,10 @@ from mindmap_orgmode import Formatter
 class TestMindmapOrgmodeIntegration(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.formatter = Formatter()
         self.original_stdout = sys.stdout
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
+        self.formatter = Formatter()
 
     def tearDown(self) -> None:
         sys.stdout = self.original_stdout

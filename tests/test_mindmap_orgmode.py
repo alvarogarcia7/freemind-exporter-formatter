@@ -420,24 +420,6 @@ class TestMindmapOrgmode(unittest.TestCase):
         self.assertIn("Subtotal: 1h", lines)
         self.assertIn("Total: 2h", lines)
 
-    def test_print_output(self) -> None:
-        from io import StringIO
-        import sys
-
-        original_stdout = sys.stdout
-        captured_output = StringIO()
-        sys.stdout = captured_output
-
-        lines = ["Line 1", "Line 2", "Line 3"]
-        self.formatter._print_output(lines)
-
-        sys.stdout = original_stdout
-        output = captured_output.getvalue()
-
-        self.assertIn("Line 1", output)
-        self.assertIn("Line 2", output)
-        self.assertIn("Line 3", output)
-
 
 class TestFormatOrgmodeOutput(unittest.TestCase):
 

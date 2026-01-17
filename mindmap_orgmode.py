@@ -5,13 +5,18 @@ from typing import Optional, List, Dict, Any, Tuple
 
 
 class Formatter(MindmapExporter):
-    def export(self, tree: xml.Element) -> None:
+    def parse(self, tree: xml.Element) -> None:
         date_nodes = self._find_all_date_nodes(tree)
         all_projects, all_worklog_entries, dates_seen = self._extract_all_data(date_nodes)
-        output_lines = self._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
-        self._print_output(output_lines)
+        self.result = (all_projects, all_worklog_entries, dates_seen)
 
-    def _format_orgmode_output(self, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> List[str]:
+    def format(self) -> list[str]:
+        if self.result is None:
+            return []
+        all_projects, all_worklog_entries, dates_seen = self.result
+        return self._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+
+    def _format_orgmode_output(self, all_projects: List[Dict[str, Any]], all_worklog_entries: List[Dict[str, Any]], dates_seen: List[date]) -> list[str]:
         """Format the extracted data into orgmode output lines."""
         lines: List[str] = []
         sorted_dates = sorted(dates_seen)
@@ -134,11 +139,6 @@ class Formatter(MindmapExporter):
                 lines.append("")
 
         return lines
-
-    def _print_output(self, lines: List[str]) -> None:
-        """Print the output lines to stdout."""
-        for line in lines:
-            print(line)
 
     def _find_all_date_nodes(self, root: xml.Element) -> List[xml.Element]:
         date_nodes: List[xml.Element] = []
