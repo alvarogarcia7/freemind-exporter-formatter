@@ -18,7 +18,7 @@ python3 main.py --input ./data/Freemind/test1.mm --formatter latex_slides.py""")
 
     def test_titles(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/Freemind/test1.mm --formatter print_as_titles.py""")))
+python3 main.py --input ./data/Freemind/test1.mm --formatter titles.py""")))
 
     def test_freeplane_leaf_as_text(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
@@ -30,7 +30,7 @@ python3 main.py --input ./data/FreePlane/mm1.mm --formatter latex_slides.py"""))
 
     def test_freeplane_titles(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/mm1.mm --formatter print_as_titles.py""")))
+python3 main.py --input ./data/FreePlane/mm1.mm --formatter titles.py""")))
 
     def test_mindmap_orgmode(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
