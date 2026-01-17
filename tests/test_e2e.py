@@ -58,7 +58,7 @@ python3 main.py --input ./data/FreePlane/orgmode_test5.mm --formatter orgmode.py
 
     def test_mindmap_orgmode_lists(self) -> None:
         verify(self.command_helper.invoke_command(self.command_helper.to_list("""\
-python3 main.py --input ./data/FreePlane/orgmode_lists/input.mm --formatter mindmap_orgmode_lists.py""")))
+python3 main.py --input ./data/FreePlane/orgmode_lists/input.mm --formatter orgmode_lists.py""")))
 
 
 if __name__ == '__main__':

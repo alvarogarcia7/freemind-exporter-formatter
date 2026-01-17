@@ -1,7 +1,7 @@
 import unittest
 import xml.etree.ElementTree as xml
 
-from mindmap_orgmode_lists import Formatter
+from orgmode_lists import Formatter
 
 
 class TestMindmapOrgmodeLists(unittest.TestCase):
