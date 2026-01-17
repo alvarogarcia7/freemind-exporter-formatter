@@ -1,7 +1,5 @@
 import unittest
 import xml.etree.ElementTree as xml
-from io import StringIO
-import sys
 
 from mindmap_orgmode_lists import Formatter
 
@@ -10,15 +8,16 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
 
     def setUp(self) -> None:
         self.formatter = Formatter()
-        self.original_stdout = sys.stdout
-        self.captured_output = StringIO()
-        sys.stdout = self.captured_output
 
-    def tearDown(self) -> None:
-        sys.stdout = self.original_stdout
+    def get_output_lines(self, root: xml.Element) -> list[str]:
+        """Parse the root and return formatted output lines."""
+        formatter = Formatter()
+        formatter.parse(root)
+        return formatter.format()
 
-    def get_output(self) -> str:
-        return self.captured_output.getvalue()
+    def get_output(self, root: xml.Element) -> str:
+        """Parse the root and return formatted output as a string."""
+        return '\n'.join(self.get_output_lines(root))
 
     def test_is_leaf_with_leaf_node(self) -> None:
         xml_str = '<node TEXT="Leaf"/>'
@@ -71,8 +70,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             </node>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         lines = output.split('\n')
         self.assertEqual(lines[0], '#+title: Export')
@@ -92,8 +90,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="Leaf3"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         lines = output.split('\n')
         leaf1_idx = next(i for i, line in enumerate(lines) if '- Leaf1' in line)
@@ -111,8 +108,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="! TODO Item"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         lines = output.split('\n')
         leaf_idx = next(i for i, line in enumerate(lines) if '- Leaf1' in line)
@@ -125,8 +121,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="! Buy Milk"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('** TODO Buy Milk', output)
         self.assertNotIn('- ! Buy Milk', output)
@@ -138,8 +133,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             </node>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('** TODO Project', output)
         self.assertNotIn('- ! Project', output)
@@ -149,8 +143,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="! Buy Groceries"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('Buy Groceries', output)
         self.assertNotIn('! Buy Groceries', output)
@@ -166,8 +159,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             </node>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('* PROJ Level1', output)
         self.assertIn('** PROJ Level2', output)
@@ -182,8 +174,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             </node>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         # Should still process the child even though parent has no TEXT
         self.assertIn('- Child', output)
@@ -205,10 +196,9 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="! Buy Milk"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
-        lines = output.strip().split('\n')
+        lines = output.split('\n')
 
         # Verify header
         self.assertEqual(lines[0], '#+title: Export')
@@ -229,20 +219,17 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
     def test_header_format(self) -> None:
         xml_str = '<node TEXT="Test"/>'
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output_lines = self.get_output_lines(root)
 
-        lines = output.split('\n')
-        self.assertEqual(lines[0], '#+title: Export')
-        self.assertEqual(lines[1], '')
+        self.assertEqual(output_lines[0], '#+title: Export')
+        self.assertEqual(output_lines[1], '')
 
     def test_single_leaf_node(self) -> None:
         xml_str = '''<node TEXT="Root">
             <node TEXT="Leaf"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('* PROJ Root', output)
         self.assertIn('- Leaf', output)
@@ -252,8 +239,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
             <node TEXT="! TODO"/>
         </node>'''
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         self.assertIn('** TODO TODO', output)
 
@@ -261,8 +247,7 @@ class TestMindmapOrgmodeLists(unittest.TestCase):
         """Root node should always be PROJ, even if it starts with !"""
         xml_str = '<node TEXT="! Root"/>'
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-        output = self.get_output()
+        output = self.get_output(root)
 
         # Root should keep the ! in the text since we don't remove it for root
         self.assertIn('* PROJ ! Root', output)
