@@ -1,7 +1,5 @@
 import unittest
 import xml.etree.ElementTree as xml
-from io import StringIO
-import sys
 from datetime import datetime, date
 
 from mindmap_orgmode import Formatter
@@ -9,17 +7,15 @@ from mindmap_orgmode import Formatter
 
 class TestMindmapOrgmodeIntegration(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self.original_stdout = sys.stdout
-        self.captured_output = StringIO()
-        sys.stdout = self.captured_output
-        self.formatter = Formatter()
+    def get_output_lines(self, root: xml.Element) -> list[str]:
+        """Parse the root and return formatted output lines."""
+        formatter = Formatter()
+        formatter.parse(root)
+        return formatter.format()
 
-    def tearDown(self) -> None:
-        sys.stdout = self.original_stdout
-
-    def get_output(self) -> str:
-        return self.captured_output.getvalue()
+    def get_output(self, root: xml.Element) -> str:
+        """Parse the root and return formatted output as a string."""
+        return '\n'.join(self.get_output_lines(root))
 
     def test_end_to_end_project_with_subtasks(self) -> None:
         """E2E test: Read XML -> Extract data -> Format -> Print with projects and subtasks."""
@@ -44,9 +40,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("* PROJ Worklog", output)
         self.assertIn("**** PROJ Main Project", output)
         self.assertIn("***** Subtask 1", output)
@@ -71,9 +65,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("* PROJ Worklog", output)
         self.assertIn("** PROJ [2026-01-16 Fri]", output)
         self.assertIn("*** PROJ Projects", output)
@@ -95,9 +87,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("* PROJ Worklog", output)
         self.assertIn("** PROJ [2026-01-16 Fri]", output)
         self.assertIn("*** PROJ Projects", output)
@@ -122,9 +112,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("- 08:36 - 11:16 ; Important comment ; Another note", output)
 
     def test_multiple_dates_sorted(self) -> None:
@@ -160,9 +148,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         lines = output.split('\n')
         date_lines = [line for line in lines if line.startswith('** PROJ [')]
         self.assertEqual(len(date_lines), 3)
@@ -179,9 +165,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("* PROJ Worklog", output)
         self.assertIn("** PROJ [2026-01-19 Mon]", output)
         self.assertNotIn("*** PROJ Projects", output)
@@ -202,9 +186,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("**** PROJ investigate git-annex", output)
 
     def test_tasks_without_end_time_filled_by_next_task(self) -> None:
@@ -226,9 +208,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("- 08:00 - 09:30: First task", output)
         self.assertIn("- 09:30 - 14:00: Second task", output)
         self.assertIn("- 14:00 - noend: Third task", output)
@@ -254,9 +234,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("*** PROJ Projects", output)
         self.assertIn("**** PROJ Investigate git-annex", output)
         self.assertIn("- 08:36 - 11:16", output)
