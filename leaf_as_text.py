@@ -1,19 +1,17 @@
 from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
-from typing import List
 
 
 class Formatter(MindmapExporter):
-    def export(self, tree: xml.Element) -> None:
-        output_lines = self._format_tree(tree)
-        self._print_output(output_lines)
+    def parse(self, tree: xml.Element) -> None:
+        self.lines = self._format_tree_as_titles(tree, 1)
 
-    def _format_tree(self, root: xml.Element) -> List[str]:
-        return self._format_tree_as_titles(root, 1)
+    def format(self) -> list[str]:
+        return self.lines.copy()
 
-    def _format_tree_as_titles(self, root: xml.Element, level: int) -> List[str]:
-        lines: List[str] = []
-        
+    def _format_tree_as_titles(self, root: xml.Element, level: int) -> list[str]:
+        lines: list[str] = []
+
         if 'TEXT' not in root.attrib:
             for child in root:
                 lines.extend(self._format_tree_as_titles(child, level))
@@ -30,7 +28,3 @@ class Formatter(MindmapExporter):
             lines.append("")
 
         return lines
-
-    def _print_output(self, lines: List[str]) -> None:
-        for line in lines:
-            print(line)
