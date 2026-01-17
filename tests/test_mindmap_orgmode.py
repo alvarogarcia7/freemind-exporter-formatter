@@ -3,7 +3,7 @@ from datetime import datetime, date
 import xml.etree.ElementTree as xml
 from typing import List, Dict, Any
 
-from mindmap_orgmode import Formatter
+from orgmode import Formatter
 
 
 class TestMindmapOrgmode(unittest.TestCase):
@@ -832,10 +832,10 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
 
         date_14_idx = next(i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line)
         date_15_idx = next(i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line)
-        
+
         project_z_count = sum(1 for line in lines if "**** PROJ Project Z" in line)
         self.assertEqual(project_z_count, 2)
-        
+
         self.assertLess(date_14_idx, date_15_idx)
 
     def test_format_orgmode_output_zero_duration_entries_show_zero_total(self) -> None:
@@ -926,7 +926,7 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
 
         date_14_idx = next(i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line)
         date_15_idx = next(i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line)
-        
+
         blank_lines_between = [i for i in range(date_14_idx, date_15_idx) if lines[i] == ""]
         self.assertGreater(len(blank_lines_between), 0)
 

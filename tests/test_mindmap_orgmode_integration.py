@@ -2,7 +2,7 @@ import unittest
 import xml.etree.ElementTree as xml
 from datetime import datetime, date
 
-from mindmap_orgmode import Formatter
+from orgmode import Formatter
 
 
 class TestMindmapOrgmodeIntegration(unittest.TestCase):
