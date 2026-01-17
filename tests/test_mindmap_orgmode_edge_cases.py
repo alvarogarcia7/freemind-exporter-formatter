@@ -1,8 +1,6 @@
 import unittest
 import xml.etree.ElementTree as xml
 from datetime import datetime, date
-from io import StringIO
-import sys
 
 from mindmap_orgmode import Formatter
 
@@ -10,16 +8,17 @@ from mindmap_orgmode import Formatter
 class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.original_stdout = sys.stdout
-        self.captured_output = StringIO()
-        sys.stdout = self.captured_output
         self.formatter = Formatter()
 
-    def tearDown(self) -> None:
-        sys.stdout = self.original_stdout
+    def get_output_lines(self, root: xml.Element) -> list[str]:
+        """Parse the root and return formatted output lines."""
+        formatter = Formatter()
+        formatter.parse(root)
+        return formatter.format()
 
-    def get_output(self) -> str:
-        return self.captured_output.getvalue()
+    def get_output(self, root: xml.Element) -> str:
+        """Parse the root and return formatted output as a string."""
+        return '\n'.join(self.get_output_lines(root))
 
     def test_node_without_date_object(self) -> None:
         xml_str = """
@@ -62,9 +61,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("* PROJ Worklog", output)
         self.assertIn("** PROJ [2026-01-14 Wed]", output)
         self.assertNotIn("*** PROJ Projects", output)
@@ -81,9 +78,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("** PROJ [2026-01-14 Wed]", output)
 
     def test_malformed_datetime_attribute(self) -> None:
@@ -110,9 +105,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("** PROJ [2026-01-14 Wed]", output)
 
     def test_project_with_empty_task_name(self) -> None:
@@ -130,9 +123,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("- 08:36 - 11:16", output)
 
     def test_multiple_comments_on_same_time_entry(self) -> None:
@@ -161,9 +152,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         self.assertIn("*** PROJ WORKLOG", output)
 
     def test_extract_data_with_duplicate_dates(self) -> None:
@@ -215,9 +204,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         </node>
         """
         root = xml.fromstring(xml_str)
-        self.formatter.export(root)
-
-        output = self.get_output()
+        output = self.get_output(root)
         lines = output.split('\n')
         worklog_lines = [line for line in lines if line.startswith('- ') and ':' in line]
 
