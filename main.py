@@ -1,11 +1,14 @@
 import argparse
+import sys
 import xml.etree.ElementTree as xml
+from typing import Optional, TextIO
 
 
 class MindMapFormatter:
-    def __init__(self, statement_path: str, formatter_name: str):
+    def __init__(self, statement_path: str, formatter_name: str, output_file: Optional[TextIO] = None) -> None:
         self.path = statement_path
         self.program = formatter_name
+        self.output_file = output_file
 
     def read(self) -> None:
         with open(self.path, "r") as file:
@@ -36,7 +39,8 @@ class MindMapFormatter:
 
     def _print_tree(self, root: xml.Element) -> None:
         module = __import__(self.program)
-        module.Formatter().export(root)
+        formatter = module.Formatter(output=self.output_file)
+        formatter.export(root)
 
 
 if __name__ == '__main__':
@@ -44,8 +48,18 @@ if __name__ == '__main__':
     # Configuration
     parser.add_argument("--input", required=True)
     parser.add_argument("--formatter", required=True, default="print_as_titles")
+    parser.add_argument("--output", default=None, help="Output file (default: stdout)")
 
     args = parser.parse_args()
     args.formatter = args.formatter.removesuffix(".py")
 
-    MindMapFormatter(args.input, args.formatter).read()
+    # Open output file if specified, otherwise use stdout
+    output_file: Optional[TextIO] = None
+    if args.output:
+        output_file = open(args.output, "w")
+
+    try:
+        MindMapFormatter(args.input, args.formatter, output_file).read()
+    finally:
+        if output_file:
+            output_file.close()
