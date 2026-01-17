@@ -1,11 +1,11 @@
 import sys
 import xml.etree.ElementTree as xml
-from typing import Any
+from typing import Any, Optional, TextIO
 
 
 class MindmapExporter:
-    def __init__(self) -> None:
-        self.out = sys.stdout
+    def __init__(self, output: Optional[TextIO] = None) -> None:
+        self.out = output if output is not None else sys.stdout
         self.lines: list[str] = []
         """
         The parsed result of the XML tree
