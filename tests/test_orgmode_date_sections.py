@@ -235,7 +235,8 @@ class TestOrgmodeDateSections(unittest.TestCase):
         # Find indices
         leaf1_idx = next(i for i, line in enumerate(lines) if '- Leaf1' in line)
         leaf2_idx = next(i for i, line in enumerate(lines) if '- Leaf2' in line)
-        nonleaf_idx = next(i for i, line in enumerate(lines) if '*** PROJ NonLeaf1' in line)
+        # NonLeaf1 with only leaf children at level 0 should become a list item
+        nonleaf_idx = next(i for i, line in enumerate(lines) if '- NonLeaf1' in line)
 
         # Leaves should come before non-leaves
         self.assertLess(leaf1_idx, nonleaf_idx)
@@ -257,13 +258,14 @@ class TestOrgmodeDateSections(unittest.TestCase):
         lines = output.split('\n')
 
         # Find lines with proper formatting
-        has_parent = any('*** PROJ Parent' in line for line in lines)
-        has_child1 = any('- Child1' in line for line in lines)
-        has_child2 = any('- Child2' in line for line in lines)
+        # Parent with only leaf children at level 0 should be a list item
+        has_parent = any('- Parent' in line for line in lines)
+        has_child1 = any('  - Child1' in line for line in lines)
+        has_child2 = any('  - Child2' in line for line in lines)
 
-        self.assertTrue(has_parent, "Parent should be a header")
-        self.assertTrue(has_child1, "Child1 should be a list item")
-        self.assertTrue(has_child2, "Child2 should be a list item")
+        self.assertTrue(has_parent, "Parent should be a list item")
+        self.assertTrue(has_child1, "Child1 should be an indented list item")
+        self.assertTrue(has_child2, "Child2 should be an indented list item")
 
     def test_todo_items_within_section(self) -> None:
         xml_str = '''<node TEXT="Root">
@@ -437,8 +439,9 @@ class TestOrgmodeDateSections(unittest.TestCase):
         output = self.get_output(root)
 
         self.assertIn('- Direct Leaf', output)
-        self.assertIn('*** PROJ Header', output)
-        self.assertIn('- Child Leaf', output)
+        # Header with only leaf children at level 0 should be a list item
+        self.assertIn('- Header', output)
+        self.assertIn('  - Child Leaf', output)
 
 
 if __name__ == '__main__':

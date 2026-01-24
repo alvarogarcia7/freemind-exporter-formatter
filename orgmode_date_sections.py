@@ -162,6 +162,15 @@ class Formatter(MindmapExporter):
         if is_todo:
             text = text.strip()[1:].strip()
 
+        # For non-leaf nodes at level 0, check if all children are leaves
+        # If so, format as list items; otherwise, format as headers
+        is_simple_node = False
+        if not is_leaf and level == 0:
+            children = self._get_node_children(node)
+            all_children_are_leaves = all(self._is_leaf(c) or self._is_todo(c) for c in children)
+            if all_children_are_leaves:
+                is_simple_node = True
+
         # Determine format
         if is_todo:
             # TODO nodes are always headers
@@ -169,6 +178,10 @@ class Formatter(MindmapExporter):
             lines.append(f"{stars} TODO {text}")
         elif is_leaf:
             # Leaf nodes are list items with indentation
+            indent = '  ' * level
+            lines.append(f"{indent}- {text}")
+        elif is_simple_node:
+            # Simple non-leaf nodes (level 0 with only leaf children) are list items
             indent = '  ' * level
             lines.append(f"{indent}- {text}")
         else:
@@ -191,7 +204,7 @@ class Formatter(MindmapExporter):
     def _find_date_nodes_recursive(self, node: xml.Element, date_nodes: List[xml.Element]) -> None:
         """Recursively search for date nodes."""
         obj_attr = node.get('OBJECT', '')
-        if 'FormattedDate' in obj_attr and '|date' in obj_attr:
+        if 'FormattedDate' in obj_attr and obj_attr.endswith('|date'):
             date_nodes.append(node)
 
         for child in node:
@@ -253,26 +266,43 @@ class Formatter(MindmapExporter):
     def _get_task_description(self, time_node: xml.Element) -> tuple[str, list[str]]:
         """Extract task description and tags from a datetime node."""
         children = list(time_node)
-        if len(children) >= 1:
-            tags = []
-            for child in children:
-                if child.tag == 'icon':
-                    tags.append("".join(list(map(lambda x: x.title(), child.attrib['BUILTIN'].split("-")))))
-                elif child.tag == 'node':
-                    child_time = self._parse_datetime_from_node(child)
-                    if not child_time:
-                        text = child.get('TEXT', '').strip()
-                        if text:
-                            return text, tags
-                    else:
-                        for grandchild in child:
-                            if grandchild.tag == 'node':
-                                grandchild_time = self._parse_datetime_from_node(grandchild)
-                                if not grandchild_time:
-                                    text = grandchild.get('TEXT', '').strip()
-                                    if text:
-                                        return text, tags
-        return "", []
+        tags: List[str] = []
+        description = ""
+
+        # First pass: extract icon tags
+        for child in children:
+            if child.tag == 'icon':
+                tags.append("".join(list(map(lambda x: x.title(), child.attrib['BUILTIN'].split("-")))))
+
+        # Second pass: find description and text-based tags
+        for child in children:
+            if child.tag == 'node':
+                child_time = self._parse_datetime_from_node(child)
+                # Skip datetime children (end times)
+                if not child_time:
+                    text = child.get('TEXT', '').strip()
+                    if text:
+                        # If this node has children, recurse to find actual description
+                        grandchildren = self._get_node_children(child)
+                        if grandchildren:
+                            # This node might be a tag wrapper, check its children
+                            found_description = False
+                            for grandchild in grandchildren:
+                                if not self._is_datetime_node(grandchild):
+                                    grandtext = grandchild.get('TEXT', '').strip()
+                                    if grandtext and not found_description:
+                                        description = grandtext
+                                        found_description = True
+                                        # Treat the intermediate node text as a tag
+                                        if text and text not in tags:
+                                            tags.append(text)
+                                        break
+                        else:
+                            # No children, use this text as description
+                            if not description:
+                                description = text
+
+        return description, tags
 
     def _extract_tags_from_node(self, node: xml.Element) -> List[str]:
         """Extract icon tags from a node and convert to TitleCase."""
