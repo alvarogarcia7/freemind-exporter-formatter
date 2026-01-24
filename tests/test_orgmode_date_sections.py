@@ -439,9 +439,9 @@ class TestOrgmodeDateSections(unittest.TestCase):
         output = self.get_output(root)
 
         self.assertIn('- Direct Leaf', output)
-        # Header with only leaf children at level 0 should be a list item
-        self.assertIn('- Header', output)
-        self.assertIn('  - Child Leaf', output)
+        # In RAYW section, non-leaf items become headers without PROJ prefix
+        self.assertIn('*** Header', output)
+        self.assertIn('- Child Leaf', output)
 
 
 if __name__ == '__main__':
