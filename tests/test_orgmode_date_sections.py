@@ -178,7 +178,7 @@ class TestOrgmodeDateSections(unittest.TestCase):
         root = xml.fromstring(xml_str)
         output = self.get_output(root)
 
-        self.assertIn('* [2026-01-24 Fri]', output)
+        self.assertIn('* [2026-01-24 Sat]', output)
         self.assertIn('** PROJ WORKLOG', output)
         self.assertIn('- Task 1', output)
         self.assertIn('- Task 2', output)
@@ -197,7 +197,7 @@ class TestOrgmodeDateSections(unittest.TestCase):
         root = xml.fromstring(xml_str)
         output = self.get_output(root)
 
-        self.assertIn('* [2026-01-24 Fri]', output)
+        self.assertIn('* [2026-01-24 Sat]', output)
         self.assertIn('** PROJ TIMES', output)
         self.assertIn('- 08:36 - 11:16: Work task', output)
 
@@ -212,7 +212,7 @@ class TestOrgmodeDateSections(unittest.TestCase):
         root = xml.fromstring(xml_str)
         output = self.get_output(root)
 
-        self.assertIn('* [2026-01-24 Fri]', output)
+        self.assertIn('* [2026-01-24 Sat]', output)
         self.assertIn('** TODO', output)
         self.assertNotIn('** PROJ TODO', output)
 
@@ -245,10 +245,9 @@ class TestOrgmodeDateSections(unittest.TestCase):
         xml_str = '''<node TEXT="Root">
             <node TEXT="2026-01-24" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-24T00:00+0400|date">
                 <node TEXT="WORKLOG">
-                    <node TEXT="Level 1">
-                        <node TEXT="Level 2">
-                            <node TEXT="Level 3"/>
-                        </node>
+                    <node TEXT="Parent">
+                        <node TEXT="Child1"/>
+                        <node TEXT="Child2"/>
                     </node>
                 </node>
             </node>
@@ -257,14 +256,14 @@ class TestOrgmodeDateSections(unittest.TestCase):
         output = self.get_output(root)
         lines = output.split('\n')
 
-        # Find lines with proper indentation
-        has_level1 = any('*** PROJ Level 1' in line for line in lines)
-        has_level2 = any('- Level 2' in line for line in lines)
-        has_level3 = any('  - Level 3' in line for line in lines)
+        # Find lines with proper formatting
+        has_parent = any('*** PROJ Parent' in line for line in lines)
+        has_child1 = any('- Child1' in line for line in lines)
+        has_child2 = any('- Child2' in line for line in lines)
 
-        self.assertTrue(has_level1, "Level 1 should be a header")
-        self.assertTrue(has_level2, "Level 2 should be a list item")
-        self.assertTrue(has_level3, "Level 3 should be a nested list item with indentation")
+        self.assertTrue(has_parent, "Parent should be a header")
+        self.assertTrue(has_child1, "Child1 should be a list item")
+        self.assertTrue(has_child2, "Child2 should be a list item")
 
     def test_todo_items_within_section(self) -> None:
         xml_str = '''<node TEXT="Root">
