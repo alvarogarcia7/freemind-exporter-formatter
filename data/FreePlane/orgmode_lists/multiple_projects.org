@@ -1,0 +1,46 @@
+* [2026-01-24 Sat]
+** PROJ WORKLOG
+- Filled Hauser Inx with Jinhao Blueish Violet Ink. Tested on a cheap "Tower Shorthand Book" notebook
+- Did a brain dump of ideas and mixed stuff after getting up from bed.
+- Mindmap-Exporter-Formatter
+  - Rename freemind-exporter-formatter to Mindmap-Exporter-Formatter
+
+
+** PROJ TIMES
+- 18:46 - 18:59: Set up X1
+- 18:59 - 19:31: Persist configuration to disk :X1:
+- 19:31 - 20:42: Break
+- 20:42 - 22:05: Persist configuration to disk :X1:
+- 22:05 - 22:50: Write tasks :MMEF:
+
+** TODO
+*** TODO Organize all papers, so they are clean
+*** PROJ Mindmap-Exporter-Formatter
+**** TODO Rename freemind-exporter-formatter to Mindmap-Exporter-Formatter
+**** TODO Add support for exporting other items
+- TIMES
+  - Should export children nodes as well
+  - WORKLOG
+  - NEXT
+  - TODO
+  - RAYW
+  - LEARNLOG
+  - Export the TODAY in the desired format
+
+** PROJ LEARNLOG
+- Idea 1
+  - Idea 1-2
+- Idea 2
+  - Idea 2-2
+
+** PROJ NEXT
+*** PROJ X1
+- Topic 1
+
+** PROJ RAYW
+- Idea 3
+*** Idea 1
+- Idea 1-2
+*** Idea 2
+- Idea 2-2
+
