@@ -35,7 +35,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="Simple Node" ID="ID_123" CREATED="1234567890"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._convert_node_to_dict(node)
-        
+
         self.assertEqual(result['tag'], 'node')
         self.assertEqual(result['text'], 'Simple Node')
         self.assertEqual(result['attributes']['ID'], 'ID_123')
@@ -50,7 +50,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._convert_node_to_dict(node)
-        
+
         self.assertEqual(result['text'], 'Parent')
         self.assertIn('children', result)
         self.assertEqual(len(result['children']), 2)
@@ -61,13 +61,13 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="Leaf Node"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._convert_node_to_dict(node)
-        
+
         self.assertNotIn('children', result)
 
     def test_parse_date_object_attribute(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|2026-01-16T00:00+0400|date"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['type'], 'org.freeplane.features.format.FormattedDate')
@@ -78,7 +78,7 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_datetime_object_attribute(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|2026-01-16T09:00+0400|datetime"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['type'], 'org.freeplane.features.format.FormattedDate')
@@ -89,19 +89,19 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_object_attribute_without_formatted_date(self) -> None:
         object_str = "some.other.object|value|type"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNone(result)
 
     def test_parse_object_attribute_malformed(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|incomplete"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNone(result)
 
     def test_parse_datetime_with_timezone_plus(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|2026-01-16T09:30+0400|datetime"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['parsed_datetime'], '2026-01-16T09:30:00')
@@ -109,7 +109,7 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_datetime_with_timezone_minus(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|2026-01-16T09:30-0500|datetime"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['parsed_datetime'], '2026-01-16T09:30:00')
@@ -117,7 +117,7 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_datetime_without_timezone(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|2026-01-16T09:30|datetime"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['parsed_datetime'], '2026-01-16T09:30:00')
@@ -125,7 +125,7 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_invalid_date(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|invalid-date|date"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertNotIn('parsed_date', result)
@@ -133,7 +133,7 @@ class TestJsonFormatter(unittest.TestCase):
     def test_parse_invalid_datetime(self) -> None:
         object_str = "org.freeplane.features.format.FormattedDate|invalid-datetime|datetime"
         result = self.formatter._parse_object_attribute(object_str)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertNotIn('parsed_datetime', result)
@@ -142,7 +142,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="16/01/2026" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T00:00+0400|date"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._get_date_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.year, 2026)
@@ -153,42 +153,42 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="Invalid" OBJECT="org.freeplane.features.format.FormattedDate|invalid|date"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._get_date_from_node(node)
-        
+
         self.assertIsNone(result)
 
     def test_get_date_from_node_without_object(self) -> None:
         xml_str = '<node TEXT="No Date"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._get_date_from_node(node)
-        
+
         self.assertIsNone(result)
 
     def test_is_datetime_node_true(self) -> None:
         xml_str = '<node TEXT="16/01/2026 09:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T09:00+0400|datetime"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._is_datetime_node(node)
-        
+
         self.assertTrue(result)
 
     def test_is_datetime_node_false_for_date(self) -> None:
         xml_str = '<node TEXT="16/01/2026" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T00:00+0400|date"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._is_datetime_node(node)
-        
+
         self.assertFalse(result)
 
     def test_is_datetime_node_false_for_regular_node(self) -> None:
         xml_str = '<node TEXT="Regular Node"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._is_datetime_node(node)
-        
+
         self.assertFalse(result)
 
     def test_parse_datetime_from_node(self) -> None:
         xml_str = '<node TEXT="16/01/2026 09:00" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T09:00+0400|datetime"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._parse_datetime_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result, datetime(2026, 1, 16, 9, 0))
@@ -197,7 +197,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="16/01/2026 14:30" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T14:30+0800|datetime"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._parse_datetime_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.hour, 14)
@@ -207,7 +207,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="16/01/2026 10:45" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-16T10:45-0500|datetime"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._parse_datetime_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.hour, 10)
@@ -217,7 +217,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="Invalid" OBJECT="org.freeplane.features.format.FormattedDate|invalid|datetime"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._parse_datetime_from_node(node)
-        
+
         self.assertIsNone(result)
 
     def test_extract_time_entry_with_start_and_end(self) -> None:
@@ -228,7 +228,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_time_entry(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['start'], '2026-01-16T09:00:00')
@@ -242,7 +242,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_time_entry(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['start'], '2026-01-16T09:00:00')
@@ -259,7 +259,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_time_entry(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['comments'], ['Comment 1', 'Comment 2'])
@@ -268,7 +268,7 @@ class TestJsonFormatter(unittest.TestCase):
         xml_str = '<node TEXT="Just a task"/>'
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_time_entry(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['task'], 'Just a task')
@@ -288,7 +288,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_task_time_entries(node)
-        
+
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0]['start'], '2026-01-16T09:00:00')
         self.assertEqual(result[1]['start'], '2026-01-16T11:00:00')
@@ -301,7 +301,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_task_time_entries(node)
-        
+
         self.assertEqual(len(result), 0)
 
     def test_extract_project_data_with_direct_times(self) -> None:
@@ -314,7 +314,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_project_data(node, "Project A")
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['name'], 'Project A')
@@ -338,7 +338,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_project_data(node, "Project B")
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['name'], 'Project B')
@@ -354,7 +354,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_project_data(node, "Project C")
-        
+
         self.assertIsNone(result)
 
     def test_extract_worklog_section_with_projects(self) -> None:
@@ -369,7 +369,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_section(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['name'], 'WORKLOG')
@@ -387,7 +387,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_section(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['name'], 'WORKLOG')
@@ -402,7 +402,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_section(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['name'], 'WORKLOG')
@@ -424,7 +424,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result['date'], '2026-01-16T00:00:00')
@@ -439,7 +439,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_from_node(node)
-        
+
         self.assertIsNone(result)
 
     def test_extract_worklog_from_node_with_times_section(self) -> None:
@@ -456,7 +456,7 @@ class TestJsonFormatter(unittest.TestCase):
         """
         node = xml.fromstring(xml_str)
         result = self.formatter._extract_worklog_from_node(node)
-        
+
         self.assertIsNotNone(result)
         assert result is not None
         self.assertIn('sections', result)
@@ -472,7 +472,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         self.assertEqual(result['text'], 'Root')
         self.assertEqual(len(result['children']), 2)
@@ -494,11 +494,11 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         self.assertEqual(result['text'], 'Root')
         self.assertEqual(len(result['children']), 1)
-        
+
         date_node = result['children'][0]
         self.assertIn('worklog', date_node)
         self.assertEqual(date_node['worklog']['date'], '2026-01-16T00:00:00')
@@ -513,7 +513,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         output = self.get_output()
         # Should not raise exception
         parsed = json_module.loads(output)
@@ -524,7 +524,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         attrs = result['attributes']
         self.assertEqual(attrs['TEXT'], 'Test')
@@ -546,7 +546,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         self.assertEqual(result['text'], 'Level1')
         level2 = result['children'][0]
@@ -561,7 +561,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         self.assertEqual(result['text'], 'Test & "special" <chars>')
 
@@ -570,7 +570,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         result = self.get_json_output()
         self.assertIn('日本語', result['text'])
         self.assertIn('Ελληνικά', result['text'])
@@ -581,7 +581,7 @@ class TestJsonFormatter(unittest.TestCase):
         node = xml.fromstring(xml_str)
         self.capture_output()
         self.formatter.export(node)
-        
+
         output = self.get_output()
         # Check for indentation (should have newlines and spaces)
         self.assertIn('\n', output)

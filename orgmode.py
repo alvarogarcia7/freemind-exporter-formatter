@@ -417,6 +417,10 @@ class Formatter(MindmapExporter):
             end_str = entry['end'].strftime('%H:%M')
             result = f"{start_str} - {end_str}: {entry['task_name']}"
         else:
-            result = f"{start_str} - noend: {entry['task_name']}"
+            task_name = entry['task_name']
+            if task_name:
+                result = f"{start_str} - noend: {task_name}"
+            else:
+                result = f"{start_str} - noend:"
 
         return result

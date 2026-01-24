@@ -1,7 +1,7 @@
 from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
 from datetime import datetime, date
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, cast
 
 
 class Formatter(MindmapExporter):
@@ -112,14 +112,19 @@ class Formatter(MindmapExporter):
 
         # Format entries
         for entry in entries:
-            start_str = entry['start'].strftime('%H:%M')
-            end_str = entry['end'].strftime('%H:%M') if entry['end'] else 'noend'
+            entry_start: datetime = cast(datetime, entry['start'])
+            entry_end: Optional[datetime] = cast(Optional[datetime], entry['end'])
+            entry_tags: List[str] = cast(List[str], entry['tags'])
+            entry_desc: str = cast(str, entry['description'])
 
-            tags_str = f" :{':'.join(entry['tags'])}:" if entry['tags'] else ""
+            start_str = entry_start.strftime('%H:%M')
+            end_str = entry_end.strftime('%H:%M') if entry_end else 'noend'
 
-            description = entry['description'].strip() if entry['description'] else ""
-            if description:
-                lines.append(f"- {start_str} - {end_str}: {description}{tags_str}")
+            tags_str = f" :{':'.join(entry_tags)}:" if entry_tags else ""
+
+            desc_clean = entry_desc.strip() if entry_desc else ""
+            if desc_clean:
+                lines.append(f"- {start_str} - {end_str}: {desc_clean}{tags_str}")
             else:
                 lines.append(f"- {start_str} - {end_str}{tags_str}")
 
