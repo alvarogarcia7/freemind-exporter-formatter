@@ -1,8 +1,9 @@
-## Freemind Mindmap Formatter
+## Mindmap Formatter
 
-Export [Freemind][0] mindmaps.
+Export mindmaps: [Freemind][0] and [FreePlane][1]
 
 [0]: http://freemind.sourceforge.net/wiki/index.php/Main_Page
+[1]: https://docs.freeplane.org/
 
 ## Scope
 ### Out of scope
@@ -13,6 +14,12 @@ Export [Freemind][0] mindmaps.
 
   * Specify a formatter from the command-line
   * Formatters are specified as Python programs
+
+### Priority / Deprecated
+
+FreePlane is better supported than Freemind.
+
+The existing behavior for Freemind will be kept for a while (as of 2026-01), but prefer using FreePlane
 
 ## How to use it
 
