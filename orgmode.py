@@ -3,9 +3,10 @@ import xml.etree.ElementTree as xml
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Tuple
 from orgmode_dates import DateReader, DateTimeReader
+from orgmode_helpers import NodeTreeHelper, DurationFormatter
 
 
-class Formatter(MindmapExporter):
+class Formatter(MindmapExporter, NodeTreeHelper):
     def parse(self, tree: xml.Element) -> None:
         date_nodes = DateReader.find_all_date_nodes(tree)
         all_projects, all_worklog_entries, dates_seen = self._extract_all_data(
@@ -99,17 +100,19 @@ class Formatter(MindmapExporter):
                             )
 
                         for entry in entries_for_date:
-                            time_str = self._format_time_entry(entry)
+                            time_str = DurationFormatter.format_time_entry(entry)
                             lines.append(f"- {time_str}")
 
                         # Calculate and display subtotal for this task if there are multiple tasks
                         if has_multiple_tasks and task_info["task_name"]:
                             task_total_minutes = sum(
-                                self._calculate_duration_minutes(e)
+                                DurationFormatter.calculate_duration_minutes(e)
                                 for e in entries_for_date
                             )
                             if task_total_minutes > 0:
-                                subtotal_str = self._format_duration(task_total_minutes)
+                                subtotal_str = DurationFormatter.format_duration(
+                                    task_total_minutes
+                                )
                                 lines.append(f"Subtotal: {subtotal_str}")
 
                         if task_info["task_name"]:
@@ -117,7 +120,7 @@ class Formatter(MindmapExporter):
 
                     total_minutes = self._calculate_project_total(project_info)
                     if total_minutes > 0:
-                        total_str = self._format_duration(total_minutes)
+                        total_str = DurationFormatter.format_duration(total_minutes)
                         lines.append(f"Total: {total_str}")
 
                     # Print blank line between projects (except after the last project)
@@ -138,14 +141,15 @@ class Formatter(MindmapExporter):
                 for section_name, entries in sections_dict.items():
                     lines.append(f"*** PROJ {section_name}")
                     for entry in entries:
-                        time_str = self._format_worklog_entry(entry)
+                        time_str = DurationFormatter.format_worklog_entry(entry)
                         lines.append(f"- {time_str}")
 
                     total_minutes = sum(
-                        self._calculate_duration_minutes(entry) for entry in entries
+                        DurationFormatter.calculate_duration_minutes(entry)
+                        for entry in entries
                     )
                     if total_minutes > 0:
-                        total_str = self._format_duration(total_minutes)
+                        total_str = DurationFormatter.format_duration(total_minutes)
                         lines.append(f"Total: {total_str}")
 
             # Add blank lines between dates
@@ -214,7 +218,7 @@ class Formatter(MindmapExporter):
                         start_time = start_time_val.value
                         end_time = self._find_end_time(task_node)
                         task_description, _ = self._get_task_description(task_node)
-                        tags = self._extract_tags_from_node(task_node)
+                        tags = NodeTreeHelper.extract_tags_from_node(task_node)
 
                         entry_date = start_time.date()
                         if entry_date not in dates_seen:
@@ -255,7 +259,7 @@ class Formatter(MindmapExporter):
                             "name": task_name,
                             "tasks": [],
                             # attach tags from the project node itself (if any icons are present)
-                            "tags": self._extract_tags_from_node(task_node),
+                            "tags": NodeTreeHelper.extract_tags_from_node(task_node),
                         }
 
                         if has_direct_times:
@@ -266,7 +270,9 @@ class Formatter(MindmapExporter):
                                         "task_name": "",
                                         "entries": task_entries,
                                         # also attach tags to this task entry so downstream code can use them if needed
-                                        "tags": self._extract_tags_from_node(task_node),
+                                        "tags": NodeTreeHelper.extract_tags_from_node(
+                                            task_node
+                                        ),
                                     }
                                 )
                         elif has_subtasks:
@@ -282,7 +288,7 @@ class Formatter(MindmapExporter):
                                             {
                                                 "task_name": child_name,
                                                 "entries": task_entries,
-                                                "tags": self._extract_tags_from_node(
+                                                "tags": NodeTreeHelper.extract_tags_from_node(
                                                     child
                                                 ),
                                             }
@@ -388,58 +394,12 @@ class Formatter(MindmapExporter):
                     tags.append("".join([p.title() for p in parts]))
         return tags
 
-    def _calculate_duration_minutes(self, entry: Dict[str, Any]) -> int:
-        if entry["end"] is None:
-            return 0
-        delta = entry["end"] - entry["start"]
-        return int(delta.total_seconds() / 60)
-
-    def _format_duration(self, total_minutes: int) -> str:
-        hours = total_minutes // 60
-        minutes = total_minutes % 60
-        if hours > 0 and minutes > 0:
-            return f"{hours}h {minutes}m"
-        elif hours > 0:
-            return f"{hours}h"
-        elif minutes > 0:
-            return f"{minutes}m"
-        else:
-            return "0m"
-
     def _calculate_project_total(self, project_info: Dict[str, Any]) -> int:
         total_minutes = 0
         for task_info in project_info["tasks"]:
             for entry in task_info["entries"]:
-                total_minutes += self._calculate_duration_minutes(entry)
+                total_minutes += DurationFormatter.calculate_duration_minutes(entry)
         return total_minutes
-
-    def _format_time_entry(self, entry: Dict[str, Any]) -> str:
-        start_str = entry["start"].strftime("%H:%M")
-        if entry["end"]:
-            end_str = entry["end"].strftime("%H:%M")
-            result = f"{start_str} - {end_str}"
-        else:
-            result = f"{start_str} -"
-
-        if entry["comments"]:
-            for comment in entry["comments"]:
-                result += f" ; {comment}"
-
-        return result
-
-    def _format_worklog_entry(self, entry: Dict[str, Any]) -> str:
-        start_str = entry["start"].strftime("%H:%M")
-        if entry["end"]:
-            end_str = entry["end"].strftime("%H:%M")
-            result = f"{start_str} - {end_str}: {entry['task_name']}"
-        else:
-            task_name = entry["task_name"]
-            if task_name:
-                result = f"{start_str} - noend: {task_name}"
-            else:
-                result = f"{start_str} - noend:"
-
-        return result
 
     # ========== Backward-compatible methods (delegate to value object classes) ==========
 
@@ -460,3 +420,33 @@ class Formatter(MindmapExporter):
         """Parse datetime from node's OBJECT attribute."""
         dt_val = DateTimeReader.read_datetime(node)
         return dt_val.value if dt_val else None
+
+    # ========== Backward-compatible wrapper methods (delegate to NodeTreeHelper and DurationFormatter) ==========
+
+    def _is_leaf(self, node: xml.Element) -> bool:
+        """Backward-compatible wrapper for NodeTreeHelper.is_leaf()."""
+        return NodeTreeHelper.is_leaf(node)
+
+    def _is_todo(self, node: xml.Element) -> bool:
+        """Backward-compatible wrapper for NodeTreeHelper.is_todo()."""
+        return NodeTreeHelper.is_todo(node)
+
+    def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
+        """Backward-compatible wrapper for NodeTreeHelper.get_node_children()."""
+        return NodeTreeHelper.get_node_children(node)
+
+    def _calculate_duration_minutes(self, entry: Dict[str, Any]) -> int:
+        """Backward-compatible wrapper for DurationFormatter.calculate_duration_minutes()."""
+        return DurationFormatter.calculate_duration_minutes(entry)
+
+    def _format_duration(self, total_minutes: int) -> str:
+        """Backward-compatible wrapper for DurationFormatter.format_duration()."""
+        return DurationFormatter.format_duration(total_minutes)
+
+    def _format_time_entry(self, entry: Dict[str, Any]) -> str:
+        """Backward-compatible wrapper for DurationFormatter.format_time_entry()."""
+        return DurationFormatter.format_time_entry(entry)
+
+    def _format_worklog_entry(self, entry: Dict[str, Any]) -> str:
+        """Backward-compatible wrapper for DurationFormatter.format_worklog_entry()."""
+        return DurationFormatter.format_worklog_entry(entry)

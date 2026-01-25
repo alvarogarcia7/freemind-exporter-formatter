@@ -11,9 +11,10 @@ from orgmode_dates import (
     Section,
     DateEntry,
 )
+from orgmode_helpers import NodeTreeHelper
 
 
-class Formatter(MindmapExporter):
+class Formatter(MindmapExporter, NodeTreeHelper):
     """
     Exports date nodes and their child sections (WORKLOG, TIMES, TODO, etc.)
     in orgmode format.
@@ -148,7 +149,7 @@ class Formatter(MindmapExporter):
         Process TODO section where all nodes become headers regardless of leaf status.
         Also extracts richcontent (HTML notes) and renders as list items.
         """
-        children = self._get_node_children(section_node)
+        children = NodeTreeHelper.get_node_children(section_node)
 
         for child in children:
             self._format_todo_node(child, lines, level)
@@ -158,11 +159,11 @@ class Formatter(MindmapExporter):
     ) -> None:
         """Format a node in TODO section as a header."""
         text = node.attrib.get("TEXT", "")
-        is_todo_marked = self._is_todo(node)
+        is_todo_marked = NodeTreeHelper.is_todo(node)
 
         # Clean TODO marker if present
         if is_todo_marked:
-            text = text.strip()[1:].strip()
+            text = NodeTreeHelper.clean_todo_text(text)
 
         # In TODO section: all items become TODO by default
         # unless marked with ! for explicit PROJ
@@ -170,7 +171,7 @@ class Formatter(MindmapExporter):
 
         if level == 0:
             # Top-level items in TODO section
-            is_leaf = self._is_leaf(node)
+            is_leaf = NodeTreeHelper.is_leaf(node)
             if is_leaf:
                 # Leaf items become TODO headers
                 lines.append(f"{stars} TODO {text}")
@@ -185,7 +186,7 @@ class Formatter(MindmapExporter):
         self._extract_and_render_richcontent(node, lines, level)
 
         # Process children recursively
-        children = self._get_node_children(node)
+        children = NodeTreeHelper.get_node_children(node)
         for child in children:
             self._format_todo_node(child, lines, level + 1)
 
@@ -311,11 +312,13 @@ class Formatter(MindmapExporter):
         - Non-leaf nodes → headers
         - TODO nodes → TODO headers
         """
-        children = self._get_node_children(section_node)
+        children = NodeTreeHelper.get_node_children(section_node)
 
         # Phase 1: Leaf items (non-TODO)
         leaf_non_todo = [
-            c for c in children if self._is_leaf(c) and not self._is_todo(c)
+            c
+            for c in children
+            if NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
         ]
         for child in leaf_non_todo:
             self._format_node_hierarchical(
@@ -324,7 +327,9 @@ class Formatter(MindmapExporter):
 
         # Phase 2: Non-leaf children (non-TODO)
         nonleaf_non_todo = [
-            c for c in children if not self._is_leaf(c) and not self._is_todo(c)
+            c
+            for c in children
+            if not NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
         ]
         for child in nonleaf_non_todo:
             self._format_node_hierarchical(
@@ -332,7 +337,7 @@ class Formatter(MindmapExporter):
             )
 
         # Phase 3: TODO children
-        todos = [c for c in children if self._is_todo(c)]
+        todos = [c for c in children if NodeTreeHelper.is_todo(c)]
         for child in todos:
             self._format_node_hierarchical(
                 child, lines, level, section_name=section_name
@@ -343,20 +348,20 @@ class Formatter(MindmapExporter):
     ) -> None:
         """Format a single node hierarchically."""
         text = node.attrib.get("TEXT", "")
-        is_todo = self._is_todo(node)
-        is_leaf = self._is_leaf(node)
+        is_todo = NodeTreeHelper.is_todo(node)
+        is_leaf = NodeTreeHelper.is_leaf(node)
 
         # Clean TODO marker
         if is_todo:
-            text = text.strip()[1:].strip()
+            text = NodeTreeHelper.clean_todo_text(text)
 
         # For non-leaf nodes at level 0 in WORKLOG or LEARNLOG, check if all children are leaves
         # If so, format as list items; otherwise, format as headers
         is_simple_node = False
         if not is_leaf and level == 0 and section_name in ("WORKLOG", "LEARNLOG"):
-            children = self._get_node_children(node)
+            children = NodeTreeHelper.get_node_children(node)
             all_children_are_leaves = all(
-                self._is_leaf(c) or self._is_todo(c) for c in children
+                NodeTreeHelper.is_leaf(c) or NodeTreeHelper.is_todo(c) for c in children
             )
             if all_children_are_leaves:
                 is_simple_node = True
@@ -454,7 +459,7 @@ class Formatter(MindmapExporter):
                     text = child.get("TEXT", "").strip()
                     if text:
                         # If this node has children, recurse to find actual description
-                        grandchildren = self._get_node_children(child)
+                        grandchildren = NodeTreeHelper.get_node_children(child)
                         if grandchildren:
                             # This node might be a tag wrapper, check its children
                             found_description = False
@@ -475,28 +480,20 @@ class Formatter(MindmapExporter):
 
         return description, tags
 
-    def _extract_tags_from_node(self, node: xml.Element) -> List[str]:
-        """Extract icon tags from a node and convert to TitleCase."""
-        tags: List[str] = []
-        for child in node:
-            if child.tag == "icon":
-                builtin = child.attrib.get("BUILTIN", "")
-                if builtin:
-                    parts = builtin.split("-")
-                    tags.append("".join([p.title() for p in parts]))
-        return tags
-
-    # ========== Hierarchical Processing Methods (from orgmode_lists.py) ==========
+    # ========== Backward-compatible wrapper methods (delegate to NodeTreeHelper) ==========
 
     def _is_leaf(self, node: xml.Element) -> bool:
-        """Returns True if node has no node children."""
-        return len(self._get_node_children(node)) == 0
+        """Backward-compatible wrapper for NodeTreeHelper.is_leaf()."""
+        return NodeTreeHelper.is_leaf(node)
 
     def _is_todo(self, node: xml.Element) -> bool:
-        """Returns True if node text starts with '!'."""
-        text = node.attrib.get("TEXT", "").strip()
-        return text.startswith("!")
+        """Backward-compatible wrapper for NodeTreeHelper.is_todo()."""
+        return NodeTreeHelper.is_todo(node)
 
     def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
-        """Returns list of node children (filters to only 'node' tags)."""
-        return [child for child in node if child.tag == "node"]
+        """Backward-compatible wrapper for NodeTreeHelper.get_node_children()."""
+        return NodeTreeHelper.get_node_children(node)
+
+    def _extract_tags_from_node(self, node: xml.Element) -> List[str]:
+        """Backward-compatible wrapper for NodeTreeHelper.extract_tags_from_node()."""
+        return NodeTreeHelper.extract_tags_from_node(node)

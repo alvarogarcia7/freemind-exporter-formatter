@@ -124,6 +124,42 @@ class DateReader:
         return None
 
 
+@dataclass(frozen=True)
+class TaskEntry:
+    """Represents a worklog or time-tracking task entry."""
+
+    task_name: str
+    start: datetime
+    end: Optional[datetime]
+    date: DateType
+    tags: List[str]
+    section_name: str = "WORKLOG"
+    comments: List[str] = None  # type: ignore
+
+    def __post_init__(self) -> None:
+        """Initialize comments list if not provided."""
+        if self.comments is None:
+            object.__setattr__(self, "comments", [])
+
+
+@dataclass(frozen=True)
+class TaskInfo:
+    """Represents a task within a project with time entries."""
+
+    task_name: str
+    entries: List[dict]  # List of {start, end, comments}
+    tags: List[str]
+
+
+@dataclass(frozen=True)
+class ProjectInfo:
+    """Represents a project containing multiple tasks."""
+
+    name: str
+    tasks: List[TaskInfo]
+    tags: List[str]
+
+
 class DateTimeReader:
     """Reads and parses datetimes from mindmap XML nodes."""
 
