@@ -1,6 +1,12 @@
 include makefiles/docker-compose.mk
 include makefiles/uv.mk
 
+init: check-uv ## Initialize the project by syncing dependencies
+	${MAKE} install-dev
+	${MAKE} install-pre-commit
+	@echo "Project initialized and dependencies synced!"
+.PHONY: init
+
 install-pre-commit: check-uv ## Install and configure pre-commit hooks
 	@echo "Setting up pre-commit hooks..."
 	uv run pre-commit install --install-hooks --hook-type pre-commit

@@ -16,6 +16,10 @@ install: check-uv
 	uv sync --no-dev
 .PHONY: install
 
+install-dev: check-uv
+	uv sync
+.PHONY: install-dev
+
 # Upgrade all dependencies
 upgrade: check-uv
 	uv sync --upgrade
