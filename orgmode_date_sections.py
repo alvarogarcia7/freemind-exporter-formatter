@@ -47,9 +47,6 @@ class Formatter(MindmapExporter):
 
     def format(self) -> list[str]:
         """Format dates and sections into orgmode."""
-        if self.result is None:
-            return []
-
         lines = []
         sorted_dates = sorted(self.result, key=lambda x: x.sort_key())
 
