@@ -2,11 +2,12 @@ from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Tuple
+from orgmode_dates import DateReader, DateTimeReader
 
 
 class Formatter(MindmapExporter):
     def parse(self, tree: xml.Element) -> None:
-        date_nodes = self._find_all_date_nodes(tree)
+        date_nodes = DateReader.find_all_date_nodes(tree)
         all_projects, all_worklog_entries, dates_seen = self._extract_all_data(
             date_nodes
         )
@@ -166,22 +167,6 @@ class Formatter(MindmapExporter):
 
         return lines
 
-    def _find_all_date_nodes(self, root: xml.Element) -> List[xml.Element]:
-        date_nodes: List[xml.Element] = []
-        self._find_date_nodes_recursive(root, date_nodes)
-        return date_nodes
-
-    def _find_date_nodes_recursive(
-        self, node: xml.Element, date_nodes: List[xml.Element]
-    ) -> None:
-        obj_attr = node.get("OBJECT", "")
-        if "FormattedDate" in obj_attr and "|date" in obj_attr:
-            date_nodes.append(node)
-
-        for child in node:
-            if child.tag == "node":
-                self._find_date_nodes_recursive(child, date_nodes)
-
     def _extract_all_data(
         self, date_nodes: List[xml.Element]
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[date]]:
@@ -190,10 +175,11 @@ class Formatter(MindmapExporter):
         dates_seen: List[date] = []
 
         for date_node in date_nodes:
-            date_val = self._get_date_from_node(date_node)
-            if not date_val:
+            date_val_obj = DateReader.read_date(date_node)
+            if not date_val_obj:
                 continue
 
+            date_val = date_val_obj.value
             if date_val not in dates_seen:
                 dates_seen.append(date_val)
 
@@ -210,19 +196,6 @@ class Formatter(MindmapExporter):
 
         return all_projects, all_worklog_entries, dates_seen
 
-    def _get_date_from_node(self, node: xml.Element) -> Optional[date]:
-        obj_attr = node.get("OBJECT", "")
-        if "FormattedDate" in obj_attr:
-            parts = obj_attr.split("|")
-            if len(parts) >= 2:
-                date_str = parts[1]
-                try:
-                    dt = datetime.strptime(date_str.split("T")[0], "%Y-%m-%d")
-                    return dt.date()
-                except ValueError:
-                    pass
-        return None
-
     def _extract_from_worklog(
         self,
         worklog_node: xml.Element,
@@ -235,9 +208,10 @@ class Formatter(MindmapExporter):
             if task_node.tag == "node":
                 task_name = task_node.get("TEXT", "")
 
-                if self._is_datetime_node(task_node):
-                    start_time = self._parse_datetime_from_node(task_node)
-                    if start_time:
+                if DateTimeReader.is_datetime_node(task_node):
+                    start_time_val = DateTimeReader.read_datetime(task_node)
+                    if start_time_val:
+                        start_time = start_time_val.value
                         end_time = self._find_end_time(task_node)
                         task_description, _ = self._get_task_description(task_node)
                         tags = self._extract_tags_from_node(task_node)
@@ -262,14 +236,14 @@ class Formatter(MindmapExporter):
 
                     for child in task_node:
                         if child.tag == "node":
-                            if self._is_datetime_node(child):
+                            if DateTimeReader.is_datetime_node(child):
                                 has_direct_times = True
-                            elif not self._is_datetime_node(child):
+                            elif not DateTimeReader.is_datetime_node(child):
                                 child_has_times = False
                                 for grandchild in child:
                                     if (
                                         grandchild.tag == "node"
-                                        and self._is_datetime_node(grandchild)
+                                        and DateTimeReader.is_datetime_node(grandchild)
                                     ):
                                         child_has_times = True
                                         break
@@ -297,8 +271,9 @@ class Formatter(MindmapExporter):
                                 )
                         elif has_subtasks:
                             for child in task_node:
-                                if child.tag == "node" and not self._is_datetime_node(
-                                    child
+                                if (
+                                    child.tag == "node"
+                                    and not DateTimeReader.is_datetime_node(child)
                                 ):
                                     child_name = child.get("TEXT", "")
                                     task_entries = self._extract_task_entries(child)
@@ -322,17 +297,14 @@ class Formatter(MindmapExporter):
                             if not project_exists:
                                 all_projects.append(project_info)
 
-    def _is_datetime_node(self, node: xml.Element) -> bool:
-        obj_attr = node.get("OBJECT", "")
-        return "FormattedDate" in obj_attr and "datetime" in obj_attr
-
     def _extract_task_entries(self, task_node: xml.Element) -> List[Dict[str, Any]]:
         entries: List[Dict[str, Any]] = []
 
         for child in task_node:
             if child.tag == "node":
-                start_time = self._parse_datetime_from_node(child)
-                if start_time:
+                start_time_val = DateTimeReader.read_datetime(child)
+                if start_time_val:
+                    start_time = start_time_val.value
                     end_time = self._find_end_time(child)
                     comments = self._extract_comments(child)
 
@@ -342,33 +314,13 @@ class Formatter(MindmapExporter):
 
         return entries
 
-    def _parse_datetime_from_node(self, node: xml.Element) -> Optional[datetime]:
-        obj_attr = node.get("OBJECT", "")
-        if "FormattedDate" in obj_attr and "datetime" in obj_attr:
-            parts = obj_attr.split("|")
-            if len(parts) >= 2:
-                datetime_str = parts[1]
-                try:
-                    if "T" in datetime_str:
-                        if "+" in datetime_str:
-                            dt_part = datetime_str.split("+")[0]
-                        else:
-                            dt_parts = datetime_str.split("-")
-                            if len(dt_parts) >= 3:
-                                dt_part = f"{dt_parts[0]}-{dt_parts[1]}-{dt_parts[2]}"
-                            else:
-                                dt_part = datetime_str
-                        return datetime.strptime(dt_part, "%Y-%m-%dT%H:%M")
-                except ValueError:
-                    pass
-        return None
-
     def _find_end_time(self, start_node: xml.Element) -> Optional[datetime]:
+        """Find end time in children of a datetime node."""
         for child in start_node:
             if child.tag == "node":
-                end_time = self._parse_datetime_from_node(child)
-                if end_time:
-                    return end_time
+                end_time_val = DateTimeReader.read_datetime(child)
+                if end_time_val:
+                    return end_time_val.value
         return None
 
     def _get_task_description(self, time_node: xml.Element) -> tuple[str, list[str]]:
@@ -388,7 +340,7 @@ class Formatter(MindmapExporter):
                         )
                     )
                 elif child.tag == "node":
-                    child_time = self._parse_datetime_from_node(child)
+                    child_time = DateTimeReader.read_datetime(child)
                     if not child_time:
                         text = child.get("TEXT", "").strip()
                         if text:
@@ -396,7 +348,7 @@ class Formatter(MindmapExporter):
                     else:
                         for grandchild in child:
                             if grandchild.tag == "node":
-                                grandchild_time = self._parse_datetime_from_node(
+                                grandchild_time = DateTimeReader.read_datetime(
                                     grandchild
                                 )
                                 if not grandchild_time:
@@ -488,3 +440,23 @@ class Formatter(MindmapExporter):
                 result = f"{start_str} - noend:"
 
         return result
+
+    # ========== Backward-compatible methods (delegate to value object classes) ==========
+
+    def _find_all_date_nodes(self, root: xml.Element) -> List[xml.Element]:
+        """Find all date nodes in the tree recursively."""
+        return DateReader.find_all_date_nodes(root)
+
+    def _get_date_from_node(self, node: xml.Element) -> Optional[date]:
+        """Extract date from node's OBJECT attribute."""
+        date_val = DateReader.read_date(node)
+        return date_val.value if date_val else None
+
+    def _is_datetime_node(self, node: xml.Element) -> bool:
+        """Check if node contains datetime information."""
+        return DateTimeReader.is_datetime_node(node)
+
+    def _parse_datetime_from_node(self, node: xml.Element) -> Optional[datetime]:
+        """Parse datetime from node's OBJECT attribute."""
+        dt_val = DateTimeReader.read_datetime(node)
+        return dt_val.value if dt_val else None
