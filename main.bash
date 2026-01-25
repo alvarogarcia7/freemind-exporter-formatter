@@ -18,7 +18,7 @@ _main_completions() {
             ;;
         --formatter)
             # List available formatter modules (Python files)
-            COMPREPLY=( $(compgen -W "$(ls -1 *.py 2>/dev/null | sed 's/\.py$//' | grep -v main | grep -v main_wrapper)" -- ${cur}) )
+            COMPREPLY=( $(compgen -W "$(ls -1 *.py 2>/dev/null | sed 's/\.py$//' | grep -v main | grep -v main_wrapper | grep -v generate_completions)" -- ${cur}) )
             return 0
             ;;
         --output)
