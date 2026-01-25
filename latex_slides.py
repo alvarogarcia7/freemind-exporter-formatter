@@ -12,12 +12,12 @@ class Formatter(MindmapExporter):
     def _format_tree_as_titles(self, root: xml.Element, level: int) -> list[str]:
         lines: list[str] = []
 
-        if 'TEXT' not in root.attrib:
+        if "TEXT" not in root.attrib:
             for child in root:
                 lines.extend(self._format_tree_as_titles(child, level))
             return lines
 
-        node_text = root.attrib['TEXT']
+        node_text = root.attrib["TEXT"]
         if level == 1:
             lines.append(f"""
 \\section{{{node_text}}}
@@ -33,7 +33,7 @@ class Formatter(MindmapExporter):
             lines.append(f"    \\item {node_text}")
 
         for child in root:
-            if child.tag == 'node':
+            if child.tag == "node":
                 lines.extend(self._format_tree_as_titles(child, level + 1))
 
         if level == 2:

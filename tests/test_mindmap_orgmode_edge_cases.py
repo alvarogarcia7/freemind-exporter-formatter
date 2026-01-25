@@ -1,12 +1,11 @@
 import unittest
 import xml.etree.ElementTree as xml
-from datetime import datetime, date
+from datetime import datetime
 
 from orgmode import Formatter
 
 
 class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
-
     def setUp(self) -> None:
         self.formatter = Formatter()
 
@@ -18,7 +17,7 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
 
     def get_output(self, root: xml.Element) -> str:
         """Parse the root and return formatted output as a string."""
-        return '\n'.join(self.get_output_lines(root))
+        return "\n".join(self.get_output_lines(root))
 
     def test_node_without_date_object(self) -> None:
         xml_str = """
@@ -180,7 +179,9 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         """
         root = xml.fromstring(xml_str)
         date_nodes = self.formatter._find_all_date_nodes(root)
-        all_projects, all_worklog_entries, dates_seen = self.formatter._extract_all_data(date_nodes)
+        all_projects, all_worklog_entries, dates_seen = (
+            self.formatter._extract_all_data(date_nodes)
+        )
 
         self.assertEqual(len(dates_seen), 1)
         self.assertEqual(len(all_projects), 2)
@@ -205,8 +206,10 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         """
         root = xml.fromstring(xml_str)
         output = self.get_output(root)
-        lines = output.split('\n')
-        worklog_lines = [line for line in lines if line.startswith('- ') and ':' in line]
+        lines = output.split("\n")
+        worklog_lines = [
+            line for line in lines if line.startswith("- ") and ":" in line
+        ]
 
         self.assertTrue(len(worklog_lines) >= 3)
         self.assertIn("08:00", worklog_lines[0])
@@ -215,13 +218,13 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
 
     def test_time_entry_without_comments(self) -> None:
         entry = {
-            'start': datetime(2026, 1, 14, 8, 36),
-            'end': datetime(2026, 1, 14, 11, 16),
-            'comments': []
+            "start": datetime(2026, 1, 14, 8, 36),
+            "end": datetime(2026, 1, 14, 11, 16),
+            "comments": [],
         }
         result = self.formatter._format_time_entry(entry)
         self.assertEqual(result, "08:36 - 11:16")
-        self.assertNotIn(';', result)
+        self.assertNotIn(";", result)
 
     def test_node_with_missing_object_attribute(self) -> None:
         xml_str = '<node TEXT="Some node"/>'
@@ -246,5 +249,5 @@ class TestMindmapOrgmodeEdgeCases(unittest.TestCase):
         self.assertEqual(result.day, 14)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

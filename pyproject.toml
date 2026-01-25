@@ -10,10 +10,14 @@ authors = [
 dependencies = []
 
 [dependency-groups]
+# added as `uv add --dev mypy`
 dev = [
     "mypy>=1.18.2",
     "pytest>=8.4.2",
-    "approvaltests>=14.7.1"
+    "approvaltests>=14.7.1",
+    "ruff>=0.8.0",
+    "pre-commit>=3.4.0",
+    "pytest-xdist>=3.8.0",
 ]
 
 [tool.mypy]

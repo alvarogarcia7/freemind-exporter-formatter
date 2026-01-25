@@ -1,20 +1,78 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+  # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        fail_fast: true
       - id: check-added-large-files
+        args: [ '--maxkb=1000' ]
+        fail_fast: true
+      - id: check-merge-conflict
+        fail_fast: true
+      - id: check-json
+        fail_fast: true
+      - id: detect-private-key
+        fail_fast: true
+
+    # Python linting and import sorting with Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.9
+    hooks:
+      - id: ruff-check
+        fail_fast: true
+        args: ['--fix']
+        name: Ruff Check
+      - id: ruff-format
+        fail_fast: true
+        name: Ruff Format
+
+  # Python linting
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        fail_fast: true
+        args: [ '--max-line-length=180', '--extend-ignore=E203,W503' ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.0
+    hooks:
+      - id: mypy
+        entry: uv run mypy .
+        fail_fast: true
+        name: Type Check with mypy
+        additional_dependencies: [
+        ]
+        stages: [ pre-commit, pre-push ]
+        pass_filenames: false
+        files: ^.*\.py$
+
   - repo: local
     hooks:
-      - id: mypy-typecheck
-        name: MyPy Typecheck
-        entry: make typecheck
+      # Execute all unit tests in the backend during pre-commit
+      - id: unit-test_pre-commit
+        name: Unit Tests
+        fail_fast: true
+        entry: uv run pytest -n auto .
         language: system
-      - id: unittest
-        name: Python Unit Tests
-        entry: make test-python
+        types: [ python ]
+        pass_filenames: true
+        files: ^.*\.py$
+        stages: [ pre-commit ]
+
+  - repo: local
+    hooks:
+      - id: unit-test_pre-push
+        name: Unit Tests
+        fail_fast: true
+        entry: uv run pytest . -n auto
         language: system
+        types: [ python ]
+        pass_filenames: false
+        always_run: true
+        stages: [ pre-push ]

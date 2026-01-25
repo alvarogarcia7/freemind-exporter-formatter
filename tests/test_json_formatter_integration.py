@@ -9,7 +9,6 @@ from json_formatter import Formatter
 
 
 class TestJsonFormatterIntegration(unittest.TestCase):
-
     def setUp(self) -> None:
         self.formatter = Formatter()
         self.original_stdout = sys.stdout
@@ -50,31 +49,31 @@ class TestJsonFormatterIntegration(unittest.TestCase):
 
         result = self.get_json_output()
 
-        self.assertEqual(result['text'], 'Test Mindmap')
-        self.assertEqual(len(result['children']), 1)
+        self.assertEqual(result["text"], "Test Mindmap")
+        self.assertEqual(len(result["children"]), 1)
 
-        date_node = result['children'][0]
-        self.assertEqual(date_node['text'], '16/01/2026')
-        self.assertIn('worklog', date_node)
+        date_node = result["children"][0]
+        self.assertEqual(date_node["text"], "16/01/2026")
+        self.assertIn("worklog", date_node)
 
-        worklog = date_node['worklog']
-        self.assertEqual(worklog['date'], '2026-01-16T00:00:00')
-        self.assertEqual(len(worklog['sections']), 1)
+        worklog = date_node["worklog"]
+        self.assertEqual(worklog["date"], "2026-01-16T00:00:00")
+        self.assertEqual(len(worklog["sections"]), 1)
 
-        section = worklog['sections'][0]
-        self.assertEqual(section['name'], 'WORKLOG')
-        self.assertEqual(len(section['projects']), 1)
+        section = worklog["sections"][0]
+        self.assertEqual(section["name"], "WORKLOG")
+        self.assertEqual(len(section["projects"]), 1)
 
-        project = section['projects'][0]
-        self.assertEqual(project['name'], 'Simple Task')
-        self.assertEqual(len(project['tasks']), 1)
+        project = section["projects"][0]
+        self.assertEqual(project["name"], "Simple Task")
+        self.assertEqual(len(project["tasks"]), 1)
 
-        task = project['tasks'][0]
-        self.assertEqual(len(task['entries']), 1)
+        task = project["tasks"][0]
+        self.assertEqual(len(task["entries"]), 1)
 
-        entry = task['entries'][0]
-        self.assertEqual(entry['start'], '2026-01-16T09:00:00')
-        self.assertEqual(entry['end'], '2026-01-16T10:00:00')
+        entry = task["entries"][0]
+        self.assertEqual(entry["start"], "2026-01-16T09:00:00")
+        self.assertEqual(entry["end"], "2026-01-16T10:00:00")
 
     def test_multiple_projects_export(self) -> None:
         xml_str = """
@@ -100,12 +99,12 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        worklog = result['children'][0]['worklog']
-        section = worklog['sections'][0]
+        worklog = result["children"][0]["worklog"]
+        section = worklog["sections"][0]
 
-        self.assertEqual(len(section['projects']), 2)
-        self.assertEqual(section['projects'][0]['name'], 'Project A')
-        self.assertEqual(section['projects'][1]['name'], 'Project B')
+        self.assertEqual(len(section["projects"]), 2)
+        self.assertEqual(section["projects"][0]["name"], "Project A")
+        self.assertEqual(section["projects"][1]["name"], "Project B")
 
     def test_project_with_subtasks_export(self) -> None:
         xml_str = """
@@ -133,12 +132,12 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        project = result['children'][0]['worklog']['sections'][0]['projects'][0]
+        project = result["children"][0]["worklog"]["sections"][0]["projects"][0]
 
-        self.assertEqual(project['name'], 'Complex Project')
-        self.assertEqual(len(project['tasks']), 2)
-        self.assertEqual(project['tasks'][0]['name'], 'Subtask 1')
-        self.assertEqual(project['tasks'][1]['name'], 'Subtask 2')
+        self.assertEqual(project["name"], "Complex Project")
+        self.assertEqual(len(project["tasks"]), 2)
+        self.assertEqual(project["tasks"][0]["name"], "Subtask 1")
+        self.assertEqual(project["tasks"][1]["name"], "Subtask 2")
 
     def test_direct_time_entries_export(self) -> None:
         xml_str = """
@@ -161,12 +160,12 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        section = result['children'][0]['worklog']['sections'][0]
+        section = result["children"][0]["worklog"]["sections"][0]
 
-        self.assertIn('entries', section)
-        self.assertEqual(len(section['entries']), 2)
-        self.assertEqual(section['entries'][0]['task'], 'Quick meeting')
-        self.assertEqual(section['entries'][1]['task'], 'Lunch break')
+        self.assertIn("entries", section)
+        self.assertEqual(len(section["entries"]), 2)
+        self.assertEqual(section["entries"][0]["task"], "Quick meeting")
+        self.assertEqual(section["entries"][1]["task"], "Lunch break")
 
     def test_time_entry_with_comments_export(self) -> None:
         xml_str = """
@@ -190,12 +189,14 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        entry = result['children'][0]['worklog']['sections'][0]['projects'][0]['tasks'][0]['entries'][0]
+        entry = result["children"][0]["worklog"]["sections"][0]["projects"][0]["tasks"][
+            0
+        ]["entries"][0]
 
-        self.assertIn('comments', entry)
-        self.assertEqual(len(entry['comments']), 2)
-        self.assertEqual(entry['comments'][0], 'Comment 1')
-        self.assertEqual(entry['comments'][1], 'Comment 2')
+        self.assertIn("comments", entry)
+        self.assertEqual(len(entry["comments"]), 2)
+        self.assertEqual(entry["comments"][0], "Comment 1")
+        self.assertEqual(entry["comments"][1], "Comment 2")
 
     def test_multiple_dates_export(self) -> None:
         xml_str = """
@@ -225,13 +226,13 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        self.assertEqual(len(result['children']), 2)
+        self.assertEqual(len(result["children"]), 2)
 
-        date1 = result['children'][0]
-        self.assertEqual(date1['worklog']['date'], '2026-01-16T00:00:00')
+        date1 = result["children"][0]
+        self.assertEqual(date1["worklog"]["date"], "2026-01-16T00:00:00")
 
-        date2 = result['children'][1]
-        self.assertEqual(date2['worklog']['date'], '2026-01-17T00:00:00')
+        date2 = result["children"][1]
+        self.assertEqual(date2["worklog"]["date"], "2026-01-17T00:00:00")
 
     def test_times_section_export(self) -> None:
         xml_str = """
@@ -252,10 +253,10 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        section = result['children'][0]['worklog']['sections'][0]
+        section = result["children"][0]["worklog"]["sections"][0]
 
-        self.assertEqual(section['name'], 'TIMES')
-        self.assertEqual(len(section['projects']), 1)
+        self.assertEqual(section["name"], "TIMES")
+        self.assertEqual(len(section["projects"]), 1)
 
     def test_mixed_worklog_and_times_sections_export(self) -> None:
         xml_str = """
@@ -283,11 +284,11 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        sections = result['children'][0]['worklog']['sections']
+        sections = result["children"][0]["worklog"]["sections"]
 
         self.assertEqual(len(sections), 2)
-        self.assertEqual(sections[0]['name'], 'WORKLOG')
-        self.assertEqual(sections[1]['name'], 'TIMES')
+        self.assertEqual(sections[0]["name"], "WORKLOG")
+        self.assertEqual(sections[1]["name"], "TIMES")
 
     def test_hierarchical_mindmap_without_worklog_export(self) -> None:
         xml_str = """
@@ -307,12 +308,12 @@ class TestJsonFormatterIntegration(unittest.TestCase):
 
         result = self.get_json_output()
 
-        self.assertEqual(result['text'], 'Root')
-        self.assertEqual(len(result['children']), 2)
-        self.assertEqual(result['children'][0]['text'], 'Branch 1')
-        self.assertEqual(len(result['children'][0]['children']), 2)
-        self.assertEqual(result['children'][1]['text'], 'Branch 2')
-        self.assertEqual(len(result['children'][1]['children']), 1)
+        self.assertEqual(result["text"], "Root")
+        self.assertEqual(len(result["children"]), 2)
+        self.assertEqual(result["children"][0]["text"], "Branch 1")
+        self.assertEqual(len(result["children"][0]["children"]), 2)
+        self.assertEqual(result["children"][1]["text"], "Branch 2")
+        self.assertEqual(len(result["children"][1]["children"]), 1)
 
     def test_empty_worklog_section_export(self) -> None:
         xml_str = """
@@ -329,11 +330,11 @@ class TestJsonFormatterIntegration(unittest.TestCase):
         self.formatter.export(node)
 
         result = self.get_json_output()
-        date_node = result['children'][0]
+        date_node = result["children"][0]
 
         # Worklog is included even with entries that have no time data
-        self.assertIn('worklog', date_node)
-        self.assertEqual(len(date_node['worklog']['sections'][0]['entries']), 1)
+        self.assertIn("worklog", date_node)
+        self.assertEqual(len(date_node["worklog"]["sections"][0]["entries"]), 1)
 
     def test_node_attributes_preserved_export(self) -> None:
         xml_str = """
@@ -347,16 +348,16 @@ class TestJsonFormatterIntegration(unittest.TestCase):
 
         result = self.get_json_output()
 
-        root_attrs = result['attributes']
-        self.assertEqual(root_attrs['TEXT'], 'Root')
-        self.assertEqual(root_attrs['ID'], 'ID_ROOT')
-        self.assertEqual(root_attrs['CREATED'], '1234567890')
+        root_attrs = result["attributes"]
+        self.assertEqual(root_attrs["TEXT"], "Root")
+        self.assertEqual(root_attrs["ID"], "ID_ROOT")
+        self.assertEqual(root_attrs["CREATED"], "1234567890")
 
-        child_attrs = result['children'][0]['attributes']
-        self.assertEqual(child_attrs['TEXT'], 'Child')
-        self.assertEqual(child_attrs['ID'], 'ID_CHILD')
-        self.assertEqual(child_attrs['STYLE'], 'fork')
+        child_attrs = result["children"][0]["attributes"]
+        self.assertEqual(child_attrs["TEXT"], "Child")
+        self.assertEqual(child_attrs["ID"], "ID_CHILD")
+        self.assertEqual(child_attrs["STYLE"], "fork")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

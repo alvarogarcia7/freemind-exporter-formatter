@@ -1,11 +1,15 @@
 import argparse
-import sys
 import xml.etree.ElementTree as xml
 from typing import Optional, TextIO
 
 
 class MindMapFormatter:
-    def __init__(self, statement_path: str, formatter_name: str, output_file: Optional[TextIO] = None) -> None:
+    def __init__(
+        self,
+        statement_path: str,
+        formatter_name: str,
+        output_file: Optional[TextIO] = None,
+    ) -> None:
         self.path = statement_path
         self.program = formatter_name
         self.output_file = output_file
@@ -33,7 +37,7 @@ class MindMapFormatter:
         :return: the root node element
         """
         for child in map_root:
-            if child.tag == 'node':
+            if child.tag == "node":
                 return child
         raise ValueError("No node element found in map")
 
@@ -43,7 +47,7 @@ class MindMapFormatter:
         formatter.export(root)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Configuration
     parser.add_argument("--input", required=True)

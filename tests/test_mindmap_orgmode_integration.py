@@ -1,12 +1,10 @@
 import unittest
 import xml.etree.ElementTree as xml
-from datetime import datetime, date
 
 from orgmode import Formatter
 
 
 class TestMindmapOrgmodeIntegration(unittest.TestCase):
-
     def get_output_lines(self, root: xml.Element) -> list[str]:
         """Parse the root and return formatted output lines."""
         formatter = Formatter()
@@ -15,7 +13,7 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
 
     def get_output(self, root: xml.Element) -> str:
         """Parse the root and return formatted output as a string."""
-        return '\n'.join(self.get_output_lines(root))
+        return "\n".join(self.get_output_lines(root))
 
     def test_end_to_end_project_with_subtasks(self) -> None:
         """E2E test: Read XML -> Extract data -> Format -> Print with projects and subtasks."""
@@ -149,12 +147,12 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         """
         root = xml.fromstring(xml_str)
         output = self.get_output(root)
-        lines = output.split('\n')
-        date_lines = [line for line in lines if line.startswith('** PROJ [')]
+        lines = output.split("\n")
+        date_lines = [line for line in lines if line.startswith("** PROJ [")]
         self.assertEqual(len(date_lines), 3)
-        self.assertIn('[2026-01-20 Tue]', date_lines[0])
-        self.assertIn('[2026-01-21 Wed]', date_lines[1])
-        self.assertIn('[2026-01-22 Thu]', date_lines[2])
+        self.assertIn("[2026-01-20 Tue]", date_lines[0])
+        self.assertIn("[2026-01-21 Wed]", date_lines[1])
+        self.assertIn("[2026-01-22 Thu]", date_lines[2])
 
     def test_empty_worklog(self) -> None:
         xml_str = """
@@ -243,5 +241,5 @@ class TestMindmapOrgmodeIntegration(unittest.TestCase):
         self.assertIn("- 11:21 - noend: Work on that", output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

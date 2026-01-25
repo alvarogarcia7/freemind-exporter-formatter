@@ -15,13 +15,13 @@ class Formatter(MindmapExporter):
 
     def _parse_node(self, node: xml.Element, level: int) -> None:
         # Skip elements that don't have TEXT attribute (e.g., font, hook, edge elements)
-        if 'TEXT' not in node.attrib:
+        if "TEXT" not in node.attrib:
             # Still process children of non-TEXT elements
             for child in node:
                 self._parse_node(child, level)
             return
 
-        text = node.attrib['TEXT']
+        text = node.attrib["TEXT"]
         is_todo = self._is_todo(node)
         is_leaf = self._is_leaf(node)
 
@@ -35,26 +35,30 @@ class Formatter(MindmapExporter):
             self.lines.append(f"* PROJ {node.attrib['TEXT']}")
         elif is_todo:
             # TODO nodes are always headings
-            stars = '*' * level
+            stars = "*" * level
             self.lines.append(f"{stars} TODO {text}")
         elif is_leaf:
             # Leaf nodes (non-TODO) become list items
             self.lines.append(f"- {text}")
         else:
             # Non-leaf nodes (non-TODO) become PROJ headings
-            stars = '*' * level
+            stars = "*" * level
             self.lines.append(f"{stars} PROJ {text}")
 
         # Process children in three phases
         children = self._get_node_children(node)
 
         # Phase 1: leaf items (non-TODO)
-        leaf_non_todo = [c for c in children if self._is_leaf(c) and not self._is_todo(c)]
+        leaf_non_todo = [
+            c for c in children if self._is_leaf(c) and not self._is_todo(c)
+        ]
         for child in leaf_non_todo:
             self._parse_node(child, level + 1)
 
         # Phase 2: non-leaf children (non-TODO)
-        nonleaf_non_todo = [c for c in children if not self._is_leaf(c) and not self._is_todo(c)]
+        nonleaf_non_todo = [
+            c for c in children if not self._is_leaf(c) and not self._is_todo(c)
+        ]
         for child in nonleaf_non_todo:
             self._parse_node(child, level + 1)
 
@@ -69,9 +73,9 @@ class Formatter(MindmapExporter):
 
     def _is_todo(self, node: xml.Element) -> bool:
         """Returns True if node text starts with '!'."""
-        text = node.attrib.get('TEXT', '').strip()
-        return text.startswith('!')
+        text = node.attrib.get("TEXT", "").strip()
+        return text.startswith("!")
 
     def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
         """Returns list of node children (filters to only 'node' tags)."""
-        return [child for child in node if child.tag == 'node']
+        return [child for child in node if child.tag == "node"]

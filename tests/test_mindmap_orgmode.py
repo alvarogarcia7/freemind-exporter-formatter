@@ -7,7 +7,6 @@ from orgmode import Formatter
 
 
 class TestMindmapOrgmode(unittest.TestCase):
-
     def setUp(self) -> None:
         self.formatter = Formatter()
 
@@ -128,7 +127,6 @@ class TestMindmapOrgmode(unittest.TestCase):
         self.assertEqual(result, "Task description")
         self.assertEqual(tags, [])
 
-
     def test_get_task_description_with_description_and_tags(self) -> None:
         xml_str = """
         <node TEXT="14/01/2026 08:36" OBJECT="org.freeplane.features.format.FormattedDate|2026-01-14T08:36+0400|datetime">
@@ -219,45 +217,45 @@ class TestMindmapOrgmode(unittest.TestCase):
 
     def test_format_time_entry_with_end(self) -> None:
         entry = {
-            'start': datetime(2026, 1, 14, 8, 36),
-            'end': datetime(2026, 1, 14, 11, 16),
-            'comments': []
+            "start": datetime(2026, 1, 14, 8, 36),
+            "end": datetime(2026, 1, 14, 11, 16),
+            "comments": [],
         }
         result = self.formatter._format_time_entry(entry)
         self.assertEqual(result, "08:36 - 11:16")
 
     def test_format_time_entry_without_end(self) -> None:
         entry: Dict[str, Any] = {
-            'start': datetime(2026, 1, 14, 8, 36),
-            'end': None,
-            'comments': []
+            "start": datetime(2026, 1, 14, 8, 36),
+            "end": None,
+            "comments": [],
         }
         result = self.formatter._format_time_entry(entry)
         self.assertEqual(result, "08:36 -")
 
     def test_format_time_entry_with_comments(self) -> None:
         entry = {
-            'start': datetime(2026, 1, 14, 8, 36),
-            'end': datetime(2026, 1, 14, 11, 16),
-            'comments': ["Comment 1", "Comment 2"]
+            "start": datetime(2026, 1, 14, 8, 36),
+            "end": datetime(2026, 1, 14, 11, 16),
+            "comments": ["Comment 1", "Comment 2"],
         }
         result = self.formatter._format_time_entry(entry)
         self.assertEqual(result, "08:36 - 11:16 ; Comment 1 ; Comment 2")
 
     def test_format_worklog_entry_with_end(self) -> None:
         entry = {
-            'task_name': 'Work on this',
-            'start': datetime(2026, 1, 14, 11, 14),
-            'end': datetime(2026, 1, 14, 11, 21)
+            "task_name": "Work on this",
+            "start": datetime(2026, 1, 14, 11, 14),
+            "end": datetime(2026, 1, 14, 11, 21),
         }
         result = self.formatter._format_worklog_entry(entry)
         self.assertEqual(result, "11:14 - 11:21: Work on this")
 
     def test_format_worklog_entry_without_end(self) -> None:
         entry = {
-            'task_name': 'Work on Foo',
-            'start': datetime(2026, 1, 14, 11, 35),
-            'end': None
+            "task_name": "Work on Foo",
+            "start": datetime(2026, 1, 14, 11, 35),
+            "end": None,
         }
         result = self.formatter._format_worklog_entry(entry)
         self.assertEqual(result, "11:35 - noend: Work on Foo")
@@ -275,9 +273,9 @@ class TestMindmapOrgmode(unittest.TestCase):
         node = xml.fromstring(xml_str)
         entries: List[Dict[str, Any]] = self.formatter._extract_task_entries(node)
         self.assertEqual(len(entries), 1)
-        self.assertEqual(entries[0]['start'], datetime(2026, 1, 14, 8, 36))
-        self.assertEqual(entries[0]['end'], datetime(2026, 1, 14, 11, 16))
-        self.assertEqual(entries[0]['comments'], ["Comment"])
+        self.assertEqual(entries[0]["start"], datetime(2026, 1, 14, 8, 36))
+        self.assertEqual(entries[0]["end"], datetime(2026, 1, 14, 11, 16))
+        self.assertEqual(entries[0]["comments"], ["Comment"])
 
     def test_extract_task_entries_multiple_entries(self) -> None:
         xml_str = """
@@ -293,8 +291,8 @@ class TestMindmapOrgmode(unittest.TestCase):
         node = xml.fromstring(xml_str)
         entries = self.formatter._extract_task_entries(node)
         self.assertEqual(len(entries), 2)
-        self.assertEqual(entries[0]['start'], datetime(2026, 1, 14, 8, 36))
-        self.assertEqual(entries[1]['start'], datetime(2026, 1, 14, 11, 17))
+        self.assertEqual(entries[0]["start"], datetime(2026, 1, 14, 8, 36))
+        self.assertEqual(entries[1]["start"], datetime(2026, 1, 14, 11, 17))
 
     def test_extract_task_entries_empty(self) -> None:
         xml_str = """
@@ -309,25 +307,27 @@ class TestMindmapOrgmode(unittest.TestCase):
     def test_format_orgmode_output_basic(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project A',
-                'tasks': [
+                "name": "Project A",
+                "tasks": [
                     {
-                        'task_name': 'Task 1',
-                        'entries': [
+                        "task_name": "Task 1",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 8, 36),
-                                'end': datetime(2026, 1, 14, 11, 16),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 8, 36),
+                                "end": datetime(2026, 1, 14, 11, 16),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("* PROJ Worklog", lines)
         self.assertIn("** PROJ [2026-01-14 Wed]", lines)
@@ -340,16 +340,18 @@ class TestMindmapOrgmode(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Work on this',
-                'start': datetime(2026, 1, 14, 11, 14),
-                'end': datetime(2026, 1, 14, 11, 21),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Work on this",
+                "start": datetime(2026, 1, 14, 11, 14),
+                "end": datetime(2026, 1, 14, 11, 21),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             }
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("* PROJ Worklog", lines)
         self.assertIn("** PROJ [2026-01-14 Wed]", lines)
@@ -362,20 +364,24 @@ class TestMindmapOrgmode(unittest.TestCase):
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 22), date(2026, 1, 20), date(2026, 1, 21)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
-        date_lines = [line for line in lines if line.startswith('** PROJ [')]
+        date_lines = [line for line in lines if line.startswith("** PROJ [")]
         self.assertEqual(len(date_lines), 3)
-        self.assertIn('[2026-01-20', date_lines[0])
-        self.assertIn('[2026-01-21', date_lines[1])
-        self.assertIn('[2026-01-22', date_lines[2])
+        self.assertIn("[2026-01-20", date_lines[0])
+        self.assertIn("[2026-01-21", date_lines[1])
+        self.assertIn("[2026-01-22", date_lines[2])
 
     def test_format_orgmode_output_empty_dates(self) -> None:
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("* PROJ Worklog", lines)
         self.assertIn("** PROJ [2026-01-14 Wed]", lines)
@@ -384,35 +390,37 @@ class TestMindmapOrgmode(unittest.TestCase):
     def test_format_orgmode_output_with_multiple_tasks(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project B',
-                'tasks': [
+                "name": "Project B",
+                "tasks": [
                     {
-                        'task_name': 'Subtask 1',
-                        'entries': [
+                        "task_name": "Subtask 1",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 18, 9, 0),
-                                'end': datetime(2026, 1, 18, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 18, 9, 0),
+                                "end": datetime(2026, 1, 18, 10, 0),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     },
                     {
-                        'task_name': 'Subtask 2',
-                        'entries': [
+                        "task_name": "Subtask 2",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 18, 11, 0),
-                                'end': datetime(2026, 1, 18, 12, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 18, 11, 0),
+                                "end": datetime(2026, 1, 18, 12, 0),
+                                "comments": [],
                             }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 18)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("**** PROJ Project B", lines)
         self.assertIn("***** Subtask 1", lines)
@@ -422,7 +430,6 @@ class TestMindmapOrgmode(unittest.TestCase):
 
 
 class TestFormatOrgmodeOutput(unittest.TestCase):
-
     def setUp(self) -> None:
         self.formatter = Formatter()
 
@@ -431,7 +438,9 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen: List[date] = []
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertEqual(lines, ["* PROJ Worklog"])
 
@@ -440,7 +449,9 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("* PROJ Worklog", lines)
         self.assertIn("** PROJ [2026-01-14 Wed]", lines)
@@ -451,7 +462,9 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14), date(2026, 1, 15), date(2026, 1, 16)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("* PROJ Worklog", lines)
         self.assertIn("** PROJ [2026-01-14 Wed]", lines)
@@ -462,68 +475,74 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
     def test_format_orgmode_output_project_with_single_task(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Alpha',
-                'tasks': [
+                "name": "Project Alpha",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 30),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 30),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("**** PROJ Project Alpha", lines)
         self.assertIn("- 09:00 - 10:30", lines)
         self.assertIn("Total: 1h 30m", lines)
         self.assertNotIn("Subtotal:", "\n".join(lines))
 
-    def test_format_orgmode_output_project_with_multiple_tasks_shows_subtotals(self) -> None:
+    def test_format_orgmode_output_project_with_multiple_tasks_shows_subtotals(
+        self,
+    ) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Beta',
-                'tasks': [
+                "name": "Project Beta",
+                "tasks": [
                     {
-                        'task_name': 'Backend work',
-                        'entries': [
+                        "task_name": "Backend work",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": [],
                             },
                             {
-                                'start': datetime(2026, 1, 14, 10, 0),
-                                'end': datetime(2026, 1, 14, 11, 0),
-                                'comments': []
-                            }
-                        ]
+                                "start": datetime(2026, 1, 14, 10, 0),
+                                "end": datetime(2026, 1, 14, 11, 0),
+                                "comments": [],
+                            },
+                        ],
                     },
                     {
-                        'task_name': 'Frontend work',
-                        'entries': [
+                        "task_name": "Frontend work",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 13, 0),
-                                'end': datetime(2026, 1, 14, 14, 30),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 13, 0),
+                                "end": datetime(2026, 1, 14, 14, 30),
+                                "comments": [],
                             }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("**** PROJ Project Beta", lines)
         self.assertIn("***** Backend work", lines)
@@ -535,35 +554,37 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
     def test_format_orgmode_output_subtotal_calculation_correct(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Gamma',
-                'tasks': [
+                "name": "Project Gamma",
+                "tasks": [
                     {
-                        'task_name': 'Task A',
-                        'entries': [
+                        "task_name": "Task A",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 9, 45),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 9, 45),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     },
                     {
-                        'task_name': 'Task B',
-                        'entries': [
+                        "task_name": "Task B",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 10, 0),
-                                'end': datetime(2026, 1, 14, 10, 15),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 10, 0),
+                                "end": datetime(2026, 1, 14, 10, 15),
+                                "comments": [],
                             }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("Subtotal: 45m", lines)
         self.assertIn("Subtotal: 15m", lines)
@@ -573,23 +594,25 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Email responses',
-                'start': datetime(2026, 1, 14, 11, 0),
-                'end': datetime(2026, 1, 14, 11, 30),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Email responses",
+                "start": datetime(2026, 1, 14, 11, 0),
+                "end": datetime(2026, 1, 14, 11, 30),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             },
             {
-                'task_name': 'Team meeting',
-                'start': datetime(2026, 1, 14, 14, 0),
-                'end': datetime(2026, 1, 14, 15, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
-            }
+                "task_name": "Team meeting",
+                "start": datetime(2026, 1, 14, 14, 0),
+                "end": datetime(2026, 1, 14, 15, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
+            },
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("*** PROJ WORKLOG", lines)
         self.assertIn("- 11:00 - 11:30: Email responses", lines)
@@ -600,16 +623,18 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Lunch break',
-                'start': datetime(2026, 1, 14, 12, 0),
-                'end': datetime(2026, 1, 14, 13, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'TIMES'
+                "task_name": "Lunch break",
+                "start": datetime(2026, 1, 14, 12, 0),
+                "end": datetime(2026, 1, 14, 13, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "TIMES",
             }
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("*** PROJ TIMES", lines)
         self.assertIn("- 12:00 - 13:00: Lunch break", lines)
@@ -619,30 +644,32 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Code review',
-                'start': datetime(2026, 1, 14, 9, 0),
-                'end': datetime(2026, 1, 14, 10, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Code review",
+                "start": datetime(2026, 1, 14, 9, 0),
+                "end": datetime(2026, 1, 14, 10, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             },
             {
-                'task_name': 'Lunch',
-                'start': datetime(2026, 1, 14, 12, 0),
-                'end': datetime(2026, 1, 14, 13, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'TIMES'
+                "task_name": "Lunch",
+                "start": datetime(2026, 1, 14, 12, 0),
+                "end": datetime(2026, 1, 14, 13, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "TIMES",
             },
             {
-                'task_name': 'Documentation',
-                'start': datetime(2026, 1, 14, 14, 0),
-                'end': datetime(2026, 1, 14, 15, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
-            }
+                "task_name": "Documentation",
+                "start": datetime(2026, 1, 14, 14, 0),
+                "end": datetime(2026, 1, 14, 15, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
+            },
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("*** PROJ WORKLOG", lines)
         self.assertIn("*** PROJ TIMES", lines)
@@ -654,16 +681,18 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Open task',
-                'start': datetime(2026, 1, 14, 16, 0),
-                'end': None,
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Open task",
+                "start": datetime(2026, 1, 14, 16, 0),
+                "end": None,
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             }
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("- 16:00 - noend: Open task", lines)
         self.assertNotIn("Total:", "\n".join(lines))
@@ -672,23 +701,25 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Task 1',
-                'start': datetime(2026, 1, 14, 9, 0),
-                'end': None,
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Task 1",
+                "start": datetime(2026, 1, 14, 9, 0),
+                "end": None,
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             },
             {
-                'task_name': 'Task 2',
-                'start': datetime(2026, 1, 14, 10, 0),
-                'end': datetime(2026, 1, 14, 11, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
-            }
+                "task_name": "Task 2",
+                "start": datetime(2026, 1, 14, 10, 0),
+                "end": datetime(2026, 1, 14, 11, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
+            },
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("- 09:00 - 10:00: Task 1", lines)
         self.assertIn("- 10:00 - 11:00: Task 2", lines)
@@ -697,141 +728,163 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
     def test_format_orgmode_output_projects_and_worklog_combined(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project X',
-                'tasks': [
+                "name": "Project X",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries = [
             {
-                'task_name': 'Meetings',
-                'start': datetime(2026, 1, 14, 14, 0),
-                'end': datetime(2026, 1, 14, 15, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Meetings",
+                "start": datetime(2026, 1, 14, 14, 0),
+                "end": datetime(2026, 1, 14, 15, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             }
         ]
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("*** PROJ Projects", lines)
         self.assertIn("**** PROJ Project X", lines)
         self.assertIn("*** PROJ WORKLOG", lines)
-        project_idx = next(i for i, line in enumerate(lines) if "*** PROJ Projects" in line)
-        worklog_idx = next(i for i, line in enumerate(lines) if "*** PROJ WORKLOG" in line)
+        project_idx = next(
+            i for i, line in enumerate(lines) if "*** PROJ Projects" in line
+        )
+        worklog_idx = next(
+            i for i, line in enumerate(lines) if "*** PROJ WORKLOG" in line
+        )
         self.assertLess(project_idx, worklog_idx)
 
     def test_format_orgmode_output_multiple_projects_on_same_date(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project A',
-                'tasks': [
+                "name": "Project A",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             },
             {
-                'name': 'Project B',
-                'tasks': [
+                "name": "Project B",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 11, 0),
-                                'end': datetime(2026, 1, 14, 12, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 11, 0),
+                                "end": datetime(2026, 1, 14, 12, 0),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
-            }
+                ],
+            },
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("**** PROJ Project A", lines)
         self.assertIn("**** PROJ Project B", lines)
-        project_a_idx = next(i for i, line in enumerate(lines) if "**** PROJ Project A" in line)
-        project_b_idx = next(i for i, line in enumerate(lines) if "**** PROJ Project B" in line)
-        blank_between = any(lines[i] == "" for i in range(project_a_idx + 1, project_b_idx))
+        project_a_idx = next(
+            i for i, line in enumerate(lines) if "**** PROJ Project A" in line
+        )
+        project_b_idx = next(
+            i for i, line in enumerate(lines) if "**** PROJ Project B" in line
+        )
+        blank_between = any(
+            lines[i] == "" for i in range(project_a_idx + 1, project_b_idx)
+        )
         self.assertTrue(blank_between)
 
     def test_format_orgmode_output_project_entries_with_comments(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Y',
-                'tasks': [
+                "name": "Project Y",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': ['Fixed bug', 'Updated tests']
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": ["Fixed bug", "Updated tests"],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("- 09:00 - 10:00 ; Fixed bug ; Updated tests", lines)
 
     def test_format_orgmode_output_project_on_different_dates(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Z',
-                'tasks': [
+                "name": "Project Z",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": [],
                             },
                             {
-                                'start': datetime(2026, 1, 15, 14, 0),
-                                'end': datetime(2026, 1, 15, 15, 0),
-                                'comments': []
-                            }
-                        ]
+                                "start": datetime(2026, 1, 15, 14, 0),
+                                "end": datetime(2026, 1, 15, 15, 0),
+                                "comments": [],
+                            },
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14), date(2026, 1, 15)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
-        date_14_idx = next(i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line)
-        date_15_idx = next(i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line)
+        date_14_idx = next(
+            i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line
+        )
+        date_15_idx = next(
+            i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line
+        )
 
         project_z_count = sum(1 for line in lines if "**** PROJ Project Z" in line)
         self.assertEqual(project_z_count, 2)
@@ -841,50 +894,54 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
     def test_format_orgmode_output_zero_duration_entries_show_zero_total(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Q',
-                'tasks': [
+                "name": "Project Q",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': None,
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": None,
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         self.assertIn("- 09:00 -", lines)
 
     def test_format_orgmode_output_no_subtotal_when_single_unnamed_task(self) -> None:
         all_projects: List[Dict[str, Any]] = [
             {
-                'name': 'Project Single',
-                'tasks': [
+                "name": "Project Single",
+                "tasks": [
                     {
-                        'task_name': '',
-                        'entries': [
+                        "task_name": "",
+                        "entries": [
                             {
-                                'start': datetime(2026, 1, 14, 9, 0),
-                                'end': datetime(2026, 1, 14, 10, 0),
-                                'comments': []
+                                "start": datetime(2026, 1, 14, 9, 0),
+                                "end": datetime(2026, 1, 14, 10, 0),
+                                "comments": [],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         ]
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 14)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         subtotal_lines = [line for line in lines if "Subtotal:" in line]
         self.assertEqual(len(subtotal_lines), 0)
@@ -894,7 +951,9 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_worklog_entries: List[Dict[str, Any]] = []
         dates_seen = [date(2026, 1, 20), date(2026, 1, 14), date(2026, 1, 17)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
         date_headers = [line for line in lines if line.startswith("** PROJ [")]
         self.assertEqual(len(date_headers), 3)
@@ -906,30 +965,38 @@ class TestFormatOrgmodeOutput(unittest.TestCase):
         all_projects: List[Dict[str, Any]] = []
         all_worklog_entries = [
             {
-                'task_name': 'Task A',
-                'start': datetime(2026, 1, 14, 9, 0),
-                'end': datetime(2026, 1, 14, 10, 0),
-                'date': date(2026, 1, 14),
-                'section_name': 'WORKLOG'
+                "task_name": "Task A",
+                "start": datetime(2026, 1, 14, 9, 0),
+                "end": datetime(2026, 1, 14, 10, 0),
+                "date": date(2026, 1, 14),
+                "section_name": "WORKLOG",
             },
             {
-                'task_name': 'Task B',
-                'start': datetime(2026, 1, 15, 9, 0),
-                'end': datetime(2026, 1, 15, 10, 0),
-                'date': date(2026, 1, 15),
-                'section_name': 'WORKLOG'
-            }
+                "task_name": "Task B",
+                "start": datetime(2026, 1, 15, 9, 0),
+                "end": datetime(2026, 1, 15, 10, 0),
+                "date": date(2026, 1, 15),
+                "section_name": "WORKLOG",
+            },
         ]
         dates_seen = [date(2026, 1, 14), date(2026, 1, 15)]
 
-        lines = self.formatter._format_orgmode_output(all_projects, all_worklog_entries, dates_seen)
+        lines = self.formatter._format_orgmode_output(
+            all_projects, all_worklog_entries, dates_seen
+        )
 
-        date_14_idx = next(i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line)
-        date_15_idx = next(i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line)
+        date_14_idx = next(
+            i for i, line in enumerate(lines) if "[2026-01-14 Wed]" in line
+        )
+        date_15_idx = next(
+            i for i, line in enumerate(lines) if "[2026-01-15 Thu]" in line
+        )
 
-        blank_lines_between = [i for i in range(date_14_idx, date_15_idx) if lines[i] == ""]
+        blank_lines_between = [
+            i for i in range(date_14_idx, date_15_idx) if lines[i] == ""
+        ]
         self.assertGreater(len(blank_lines_between), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
