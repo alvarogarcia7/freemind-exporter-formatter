@@ -7,10 +7,10 @@ that represent dates, datetimes, and date entries with their sections.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from datetime import date as DateType
-from typing import Optional, List
+from typing import Optional, List, Any
 import xml.etree.ElementTree as xml
 
 
@@ -134,12 +134,7 @@ class TaskEntry:
     date: DateType
     tags: List[str]
     section_name: str = "WORKLOG"
-    comments: List[str] = None  # type: ignore
-
-    def __post_init__(self) -> None:
-        """Initialize comments list if not provided."""
-        if self.comments is None:
-            object.__setattr__(self, "comments", [])
+    comments: List[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -147,7 +142,7 @@ class TaskInfo:
     """Represents a task within a project with time entries."""
 
     task_name: str
-    entries: List[dict]  # List of {start, end, comments}
+    entries: List[dict[str, Any]]  # List of {start, end, comments}
     tags: List[str]
 
 

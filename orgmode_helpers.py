@@ -8,7 +8,7 @@ used across different ORGMode formatters.
 from __future__ import annotations
 
 import xml.etree.ElementTree as xml
-from typing import List, Optional, Callable, Tuple, Any
+from typing import List, Optional, Callable, Tuple, Any, Dict
 from datetime import datetime
 
 
@@ -100,7 +100,7 @@ class DurationFormatter:
     """Utility for formatting time durations."""
 
     @staticmethod
-    def calculate_duration_minutes(entry: dict) -> int:
+    def calculate_duration_minutes(entry: Dict[str, Any]) -> int:
         """Calculate duration in minutes from start and end datetime."""
         if entry.get("end") is None:
             return 0
@@ -130,7 +130,7 @@ class DurationFormatter:
         return dt.strftime("%H:%M")
 
     @staticmethod
-    def format_time_entry(entry: dict) -> str:
+    def format_time_entry(entry: Dict[str, Any]) -> str:
         """Format a time entry as 'HH:MM - HH:MM' with optional comments."""
         start_str = DurationFormatter.format_time_str(entry["start"])
         if entry.get("end"):
@@ -146,7 +146,7 @@ class DurationFormatter:
         return result
 
     @staticmethod
-    def format_worklog_entry(entry: dict) -> str:
+    def format_worklog_entry(entry: Dict[str, Any]) -> str:
         """Format a worklog entry as 'HH:MM - HH:MM: task_name'."""
         start_str = DurationFormatter.format_time_str(entry["start"])
         if entry.get("end"):
