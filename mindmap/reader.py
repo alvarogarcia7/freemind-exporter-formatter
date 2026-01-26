@@ -1,88 +1,42 @@
-"""
-Value objects for ORGMode date reading and processing.
-
-This module extracts date-related logic into immutable dataclasses
-that represent dates, datetimes, and date entries with their sections.
-"""
+"""Reader classes for mindmap XML parsing and tree traversal."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from datetime import date as DateType
-from typing import Optional, List, Any
 import xml.etree.ElementTree as xml
+from typing import List, Optional
+from datetime import datetime
+
+from mindmap.models import DateValue, DateTimeValue
 
 
-@dataclass(frozen=True)
-class DateValue:
-    """Represents a date extracted from a mindmap node."""
+class NodeTreeHelper:
+    """Provides common node tree traversal and classification utilities."""
 
-    value: DateType
+    @staticmethod
+    def is_leaf(node: xml.Element) -> bool:
+        """Check if node has no node children."""
+        return len(NodeTreeHelper.get_node_children(node)) == 0
 
-    def format_header(self) -> str:
-        """Format date as ORGMode header: [YYYY-MM-DD Day]"""
-        return f"[{self.value.strftime('%Y-%m-%d %a')}]"
+    @staticmethod
+    def get_node_children(node: xml.Element) -> List[xml.Element]:
+        """Return list of node children (filters to only 'node' tags)."""
+        return [child for child in node if child.tag == "node"]
 
+    @staticmethod
+    def extract_tags_from_node(node: xml.Element) -> List[str]:
+        """Extract icon tags from a node and convert BUILTIN names to TitleCase.
 
-@dataclass(frozen=True)
-class DateTimeValue:
-    """Represents a datetime extracted from a mindmap node."""
-
-    value: datetime
-
-    def format_time(self) -> str:
-        """Format time portion: HH:MM"""
-        return self.value.strftime("%H:%M")
-
-
-@dataclass(frozen=True)
-class TimeEntry:
-    """Represents a time entry in the TIMES section."""
-
-    start: DateTimeValue
-    end: Optional[DateTimeValue]
-    description: str
-    tags: List[str]
-
-    def format_line(self) -> str:
-        """Format as ORGMode time entry: - HH:MM - HH:MM: description :tags:"""
-        start_str = self.start.format_time()
-        end_str = self.end.format_time() if self.end else "noend"
-
-        desc_clean = self.description.strip() if self.description else ""
-        tags_str = f" :{':'.join(self.tags)}:" if self.tags else ""
-
-        if desc_clean:
-            return f"- {start_str} - {end_str}: {desc_clean}{tags_str}"
-        else:
-            return f"- {start_str} - {end_str}{tags_str}"
-
-
-@dataclass(frozen=True)
-class Section:
-    """Represents a section (WORKLOG, TIMES, TODO, etc.) with its content."""
-
-    name: str
-    node: xml.Element
-
-    def is_times_section(self) -> bool:
-        return self.name == "TIMES"
-
-    def is_todo_section(self) -> bool:
-        return self.name == "TODO"
-
-
-@dataclass(frozen=True)
-class DateEntry:
-    """Represents a date with its associated sections."""
-
-    date: DateValue
-    sections: List[Section]
-
-    def sort_key(self) -> DateType:
-        """Return the date value for sorting."""
-        return self.date.value
+        Example: BUILTIN="stop-sign" -> "StopSign"
+        Returns an empty list if no icons present.
+        """
+        tags: List[str] = []
+        for child in node:
+            if child.tag == "icon":
+                builtin = child.attrib.get("BUILTIN", "")
+                if builtin:
+                    parts = builtin.split("-")
+                    tags.append("".join([p.title() for p in parts]))
+        return tags
 
 
 class DateReader:
@@ -122,37 +76,6 @@ class DateReader:
                 except ValueError:
                     pass
         return None
-
-
-@dataclass(frozen=True)
-class TaskEntry:
-    """Represents a worklog or time-tracking task entry."""
-
-    task_name: str
-    start: datetime
-    end: Optional[datetime]
-    date: DateType
-    tags: List[str]
-    section_name: str = "WORKLOG"
-    comments: List[str] = field(default_factory=list)
-
-
-@dataclass(frozen=True)
-class TaskInfo:
-    """Represents a task within a project with time entries."""
-
-    task_name: str
-    entries: List[dict[str, Any]]  # List of {start, end, comments}
-    tags: List[str]
-
-
-@dataclass(frozen=True)
-class ProjectInfo:
-    """Represents a project containing multiple tasks."""
-
-    name: str
-    tasks: List[TaskInfo]
-    tags: List[str]
 
 
 class DateTimeReader:

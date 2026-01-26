@@ -1,7 +1,8 @@
 from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
 from typing import List
-from orgmode_helpers import NodeTreeHelper
+from mindmap.reader import NodeTreeHelper
+from worklog.format import TodoHelper
 
 
 class Formatter(MindmapExporter, NodeTreeHelper):
@@ -23,12 +24,12 @@ class Formatter(MindmapExporter, NodeTreeHelper):
             return
 
         text = node.attrib["TEXT"]
-        is_todo = NodeTreeHelper.is_todo(node)
+        is_todo = TodoHelper.is_todo(node)
         is_leaf = NodeTreeHelper.is_leaf(node)
 
         # Clean up TODO marker from text if needed
         if is_todo:
-            text = NodeTreeHelper.clean_todo_text(text)
+            text = TodoHelper.clean_todo_text(text)
 
         # Determine what to add to lines
         if level == 1:
@@ -53,7 +54,7 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         leaf_non_todo = [
             c
             for c in children
-            if NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
+            if NodeTreeHelper.is_leaf(c) and not TodoHelper.is_todo(c)
         ]
         for child in leaf_non_todo:
             self._parse_node(child, level + 1)
@@ -62,13 +63,13 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         nonleaf_non_todo = [
             c
             for c in children
-            if not NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
+            if not NodeTreeHelper.is_leaf(c) and not TodoHelper.is_todo(c)
         ]
         for child in nonleaf_non_todo:
             self._parse_node(child, level + 1)
 
         # Phase 3: TODO children (leaf or non-leaf)
-        todos = [c for c in children if NodeTreeHelper.is_todo(c)]
+        todos = [c for c in children if TodoHelper.is_todo(c)]
         for child in todos:
             self._parse_node(child, level + 1)
 
@@ -79,8 +80,8 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         return NodeTreeHelper.is_leaf(node)
 
     def _is_todo(self, node: xml.Element) -> bool:
-        """Backward-compatible wrapper for NodeTreeHelper.is_todo()."""
-        return NodeTreeHelper.is_todo(node)
+        """Backward-compatible wrapper for TodoHelper.is_todo()."""
+        return TodoHelper.is_todo(node)
 
     def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
         """Backward-compatible wrapper for NodeTreeHelper.get_node_children()."""

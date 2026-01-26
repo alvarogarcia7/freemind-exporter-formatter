@@ -69,22 +69,34 @@ All 203 tests must pass.
 
 ## Code Organization
 
-### Value Objects (orgmode_dates.py)
-Frozen dataclasses representing immutable data:
-- `DateValue`, `DateTimeValue`: Date/time representations
-- `TimeEntry`, `Section`, `DateEntry`: Date reading structures
-- `TaskEntry`, `TaskInfo`, `ProjectInfo`: Task and project hierarchies
-- `DateReader`, `DateTimeReader`: Factory methods for XML parsing
+### mindmap Package
+Core mindmap reading and tree traversal:
+- `mindmap/reader.py`:
+  - `NodeTreeHelper`: Tree traversal and node classification (is_leaf, get_node_children, extract_tags_from_node)
+  - `DateReader`: XML date node reading and parsing
+  - `DateTimeReader`: XML datetime node reading and parsing
+- `mindmap/models.py`: Value objects representing immutable mindmap data
+  - `DateValue`: Date representation with formatting
+  - `DateTimeValue`: Datetime representation with formatting
+  - `TimeEntry`: Time entry with start/end times
+  - `Section`: Named section (WORKLOG, TIMES, TODO, etc.)
+  - `DateEntry`: Date with associated sections
 
-### Helper Classes (orgmode_helpers.py)
-Static utility methods organized by responsibility:
-- `NodeTreeHelper`: Tree traversal and node classification
-- `DateTimeHelper`: Datetime operations
-- `DurationFormatter`: Time duration calculations and formatting
-- `HierarchicalNodeProcessor`: Three-phase node processing
+### worklog Package
+Worklog-specific formatting and TODO logic:
+- `worklog/format.py`:
+  - `TodoHelper`: TODO detection and text processing (is_todo, clean_todo_text)
+- `worklog/helpers.py`:
+  - `DateTimeHelper`: Datetime operations (find_end_time, extract_comments)
+  - `DurationFormatter`: Time duration calculations and formatting
+  - `HierarchicalNodeProcessor`: Three-phase node processing
+- `worklog/models.py`: Value objects for worklog task and project data
+  - `TaskEntry`: Worklog entry with task name and time range
+  - `TaskInfo`: Task with multiple entries
+  - `ProjectInfo`: Project containing multiple tasks
 
-### Formatters
-- `orgmode.py`: Main ORGMode output formatter
+### Formatters (root level)
+- `orgmode.py`: Main ORGMode worklog output formatter
 - `orgmode_date_sections.py`: Date section formatting
 - `orgmode_lists.py`: List formatting
 

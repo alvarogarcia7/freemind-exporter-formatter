@@ -1,9 +1,4 @@
-"""
-Shared helpers and mixins for ORGMode formatters.
-
-This module contains reusable node tree traversal utilities and helper classes
-used across different ORGMode formatters.
-"""
+"""Worklog formatting helpers and utilities."""
 
 from __future__ import annotations
 
@@ -11,48 +6,8 @@ import xml.etree.ElementTree as xml
 from typing import List, Optional, Callable, Tuple, Any, Dict
 from datetime import datetime
 
-
-class NodeTreeHelper:
-    """Mixin providing common node tree traversal and classification utilities."""
-
-    @staticmethod
-    def is_leaf(node: xml.Element) -> bool:
-        """Check if node has no node children."""
-        return len(NodeTreeHelper.get_node_children(node)) == 0
-
-    @staticmethod
-    def is_todo(node: xml.Element) -> bool:
-        """Check if node text starts with '!' (TODO marker)."""
-        text = node.attrib.get("TEXT", "").strip()
-        return text.startswith("!")
-
-    @staticmethod
-    def get_node_children(node: xml.Element) -> List[xml.Element]:
-        """Return list of node children (filters to only 'node' tags)."""
-        return [child for child in node if child.tag == "node"]
-
-    @staticmethod
-    def extract_tags_from_node(node: xml.Element) -> List[str]:
-        """Extract icon tags from a node and convert BUILTIN names to TitleCase.
-
-        Example: BUILTIN="stop-sign" -> "StopSign"
-        Returns an empty list if no icons present.
-        """
-        tags: List[str] = []
-        for child in node:
-            if child.tag == "icon":
-                builtin = child.attrib.get("BUILTIN", "")
-                if builtin:
-                    parts = builtin.split("-")
-                    tags.append("".join([p.title() for p in parts]))
-        return tags
-
-    @staticmethod
-    def clean_todo_text(text: str) -> str:
-        """Remove TODO marker ('!') from beginning of text."""
-        if text.strip().startswith("!"):
-            return text.strip()[1:].strip()
-        return text
+from mindmap.reader import DateTimeReader, NodeTreeHelper
+from worklog.format import TodoHelper
 
 
 class DateTimeHelper:
@@ -65,8 +20,6 @@ class DateTimeHelper:
         Searches for a child node with datetime information and extracts
         its datetime value. Returns None if no end time found.
         """
-        from orgmode_dates import DateTimeReader
-
         for child in start_node:
             if child.tag == "node":
                 end_time_val = DateTimeReader.read_datetime(child)
@@ -77,8 +30,6 @@ class DateTimeHelper:
     @staticmethod
     def extract_comments(node: xml.Element) -> List[str]:
         """Extract comment text from node children, skipping datetime nodes."""
-        from orgmode_dates import DateTimeReader
-
         comments: List[str] = []
         for child in node:
             if child.tag == "node":
@@ -182,13 +133,11 @@ class HierarchicalNodeProcessor:
             callback: Function to call for each matching node
             callback_args: Extra arguments to pass to callback after (node,)
         """
-        from orgmode_helpers import NodeTreeHelper
-
         matching_nodes = [
             n
             for n in nodes
             if NodeTreeHelper.is_leaf(n) == is_leaf_filter
-            and NodeTreeHelper.is_todo(n) == is_todo_filter
+            and TodoHelper.is_todo(n) == is_todo_filter
         ]
 
         for node in matching_nodes:
@@ -209,11 +158,7 @@ class HierarchicalNodeProcessor:
             callback: Function to call for each matching node
             callback_args: Extra arguments to pass to callback after (node,)
         """
-        from orgmode_helpers import NodeTreeHelper
-
-        matching_nodes = [
-            n for n in nodes if NodeTreeHelper.is_todo(n) == is_todo_filter
-        ]
+        matching_nodes = [n for n in nodes if TodoHelper.is_todo(n) == is_todo_filter]
 
         for node in matching_nodes:
             callback(node, *callback_args)
@@ -231,8 +176,6 @@ class HierarchicalNodeProcessor:
             callback: Function to call for each child (receives node + callback_args)
             callback_args: Extra arguments to pass to callback after (node,)
         """
-        from orgmode_helpers import NodeTreeHelper
-
         children = NodeTreeHelper.get_node_children(node)
 
         # Phase 1: Leaf items (non-TODO)
