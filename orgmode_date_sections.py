@@ -3,15 +3,9 @@ import xml.etree.ElementTree as xml
 from datetime import datetime, date
 from typing import Optional, List, Any
 from html.parser import HTMLParser
-from orgmode_dates import (
-    DateReader,
-    DateTimeReader,
-    DateTimeValue,
-    TimeEntry,
-    Section,
-    DateEntry,
-)
-from orgmode_helpers import NodeTreeHelper
+from mindmap.reader import DateReader, DateTimeReader, NodeTreeHelper
+from mindmap.models import DateTimeValue, TimeEntry, Section, DateEntry
+from worklog.format import TodoHelper
 
 
 class Formatter(MindmapExporter, NodeTreeHelper):
@@ -159,11 +153,11 @@ class Formatter(MindmapExporter, NodeTreeHelper):
     ) -> None:
         """Format a node in TODO section as a header."""
         text = node.attrib.get("TEXT", "")
-        is_todo_marked = NodeTreeHelper.is_todo(node)
+        is_todo_marked = TodoHelper.is_todo(node)
 
         # Clean TODO marker if present
         if is_todo_marked:
-            text = NodeTreeHelper.clean_todo_text(text)
+            text = TodoHelper.clean_todo_text(text)
 
         # In TODO section: all items become TODO by default
         # unless marked with ! for explicit PROJ
@@ -318,7 +312,7 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         leaf_non_todo = [
             c
             for c in children
-            if NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
+            if NodeTreeHelper.is_leaf(c) and not TodoHelper.is_todo(c)
         ]
         for child in leaf_non_todo:
             self._format_node_hierarchical(
@@ -329,7 +323,7 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         nonleaf_non_todo = [
             c
             for c in children
-            if not NodeTreeHelper.is_leaf(c) and not NodeTreeHelper.is_todo(c)
+            if not NodeTreeHelper.is_leaf(c) and not TodoHelper.is_todo(c)
         ]
         for child in nonleaf_non_todo:
             self._format_node_hierarchical(
@@ -337,7 +331,7 @@ class Formatter(MindmapExporter, NodeTreeHelper):
             )
 
         # Phase 3: TODO children
-        todos = [c for c in children if NodeTreeHelper.is_todo(c)]
+        todos = [c for c in children if TodoHelper.is_todo(c)]
         for child in todos:
             self._format_node_hierarchical(
                 child, lines, level, section_name=section_name
@@ -348,12 +342,12 @@ class Formatter(MindmapExporter, NodeTreeHelper):
     ) -> None:
         """Format a single node hierarchically."""
         text = node.attrib.get("TEXT", "")
-        is_todo = NodeTreeHelper.is_todo(node)
+        is_todo = TodoHelper.is_todo(node)
         is_leaf = NodeTreeHelper.is_leaf(node)
 
         # Clean TODO marker
         if is_todo:
-            text = NodeTreeHelper.clean_todo_text(text)
+            text = TodoHelper.clean_todo_text(text)
 
         # For non-leaf nodes at level 0 in WORKLOG or LEARNLOG, check if all children are leaves
         # If so, format as list items; otherwise, format as headers
@@ -361,7 +355,7 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         if not is_leaf and level == 0 and section_name in ("WORKLOG", "LEARNLOG"):
             children = NodeTreeHelper.get_node_children(node)
             all_children_are_leaves = all(
-                NodeTreeHelper.is_leaf(c) or NodeTreeHelper.is_todo(c) for c in children
+                NodeTreeHelper.is_leaf(c) or TodoHelper.is_todo(c) for c in children
             )
             if all_children_are_leaves:
                 is_simple_node = True
@@ -487,8 +481,8 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         return NodeTreeHelper.is_leaf(node)
 
     def _is_todo(self, node: xml.Element) -> bool:
-        """Backward-compatible wrapper for NodeTreeHelper.is_todo()."""
-        return NodeTreeHelper.is_todo(node)
+        """Backward-compatible wrapper for TodoHelper.is_todo()."""
+        return TodoHelper.is_todo(node)
 
     def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
         """Backward-compatible wrapper for NodeTreeHelper.get_node_children()."""

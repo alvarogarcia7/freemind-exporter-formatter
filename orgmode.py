@@ -2,8 +2,9 @@ from mindmap_exporter import MindmapExporter
 import xml.etree.ElementTree as xml
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Tuple
-from orgmode_dates import DateReader, DateTimeReader
-from orgmode_helpers import NodeTreeHelper, DurationFormatter
+from mindmap.reader import DateReader, DateTimeReader, NodeTreeHelper
+from worklog.helpers import DurationFormatter
+from worklog.format import TodoHelper
 
 
 class Formatter(MindmapExporter, NodeTreeHelper):
@@ -428,8 +429,8 @@ class Formatter(MindmapExporter, NodeTreeHelper):
         return NodeTreeHelper.is_leaf(node)
 
     def _is_todo(self, node: xml.Element) -> bool:
-        """Backward-compatible wrapper for NodeTreeHelper.is_todo()."""
-        return NodeTreeHelper.is_todo(node)
+        """Backward-compatible wrapper for TodoHelper.is_todo()."""
+        return TodoHelper.is_todo(node)
 
     def _get_node_children(self, node: xml.Element) -> List[xml.Element]:
         """Backward-compatible wrapper for NodeTreeHelper.get_node_children()."""
