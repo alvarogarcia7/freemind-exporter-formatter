@@ -1,0 +1,56 @@
+Executed command: python3 main.py --input ./data/FreePlane/mm4.mm --formatter latex_slides_section_subsection_frame_item_subitem.py
+Result code: 0
+Standard Output (starting on the new line):
+
+\section{Section 1}
+
+
+\subsection{Subsection 1.1}
+
+
+\begin{frame} % Open Frame 'Frame 1.1.1'
+	\frametitle{Frame 1.1.1}
+
+	\begin{itemize}
+		\item Item 1.1.1.1 % Item with 2 subitems
+		\begin{itemize} % Subitem in Item 'Item 1.1.1.1'
+			\item SubItem 1.1.1.1.1 % Subitem
+			\item SubItem 1.1.1.1.2 % Subitem
+		\end{itemize} % Close Subitem in Item 'Item 1.1.1.1'
+	\end{itemize}
+\end{frame} % Close Frame 'Frame 1.1.1'
+
+
+\subsection{Subsection 1.2}
+
+
+\begin{frame} % Open Frame 'Frame 1.2.1'
+	\frametitle{Frame 1.2.1}
+
+	\begin{itemize}
+		\item Item 1.2.1.1 % Item with 2 subitems
+		\begin{itemize} % Subitem in Item 'Item 1.2.1.1'
+			\item SubItem 1.2.1.1.1 % Subitem
+			\item SubItem 1.2.1.1.2 % Subitem
+		\end{itemize} % Close Subitem in Item 'Item 1.2.1.1'
+		\item Item 1.2.1.2 % Item with 2 subitems
+		\begin{itemize} % Subitem in Item 'Item 1.2.1.2'
+			\item SubItem 1.2.1.2.1 % Subitem
+			\item SubItem 1.2.1.2.2 % Subitem
+		\end{itemize} % Close Subitem in Item 'Item 1.2.1.2'
+	\end{itemize}
+\end{frame} % Close Frame 'Frame 1.2.1'
+
+
+\begin{frame} % Open Frame 'Frame 1.2.2'
+	\frametitle{Frame 1.2.2}
+\end{frame} % Close Frame 'Frame 1.2.2'
+
+
+\section{Section 2}
+
+% PRE
+Text 1
+Text 2
+
+Standard Error (starting on the new line):
