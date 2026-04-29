@@ -36,3 +36,7 @@ ruff-format:
 ruff-format-check:
 	uv run ruff format --check .
 .PHONY: ruff-format-check
+
+completions: check-uv ## Generate bash and zsh completion scripts
+	uv run python generate_completions.py
+.PHONY: completions
